@@ -2,7 +2,7 @@
 
 ## Project
 
-Hello, Cube!
+Medical Augmented Reality - Gaze Tracking 
 
 ### Unity
 
