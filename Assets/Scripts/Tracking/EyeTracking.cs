@@ -14,6 +14,7 @@ public class EyeTracking : MonoBehaviour
     public string path = "Assets/Scripts/Tracking/tracking.txt";
     public int updatesPerSecond = 5;
     DataPoints dataPoints;
+    public GameObject pointIndicator;
 
     // Start is called before the first frame update
     void Start()
@@ -33,12 +34,17 @@ public class EyeTracking : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (!MLEyes.IsStarted)
+        if (Input.GetKeyDown(KeyCode.A))
         {
-            MLEyes.Start();
+            ShowPoints(LoadFromJson());
         }
-        if (shouldRecord && !recording && MLEyes.IsStarted)
+
+        if (shouldRecord && !recording)
         {
+            if (!MLEyes.IsStarted)
+            {
+                MLEyes.Start();
+            }
             StartCoroutine("WriteData");
         }
         else
@@ -51,7 +57,9 @@ public class EyeTracking : MonoBehaviour
                 foreach(TrackedPoint p in points)
                 {
                     Debug.Log(p.time + ": " + p.pos);
+                    
                 }
+                ShowPoints(points);
             }
         }
     }
@@ -99,5 +107,13 @@ public class EyeTracking : MonoBehaviour
         }
 
         return recoveredPoints;
+    }
+
+    void ShowPoints(List<TrackedPoint> points)
+    {
+        foreach (TrackedPoint point in points) 
+        {
+            GameObject.Instantiate(pointIndicator, point.pos, Quaternion.identity);
+        }
     }
 }

@@ -326,6 +326,8 @@ MonoBehaviour:
   shouldRecord: 1
   path: Assets/Scripts/Tracking/tracking.txt
   updatesPerSecond: 5
+  pointIndicator: {fileID: 3706383693631404971, guid: a98cfee6e0f88174aa391e1b20e87de2,
+    type: 3}
 --- !u!1001 &1155836708
 PrefabInstance:
   m_ObjectHideFlags: 0
