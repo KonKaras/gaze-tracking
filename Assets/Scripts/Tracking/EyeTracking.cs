@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.IO;
-//using UnityEngine.XR.MagicLeap;
+using UnityEngine.XR.MagicLeap;
 
 public class EyeTracking : MonoBehaviour
 {
@@ -12,7 +12,7 @@ public class EyeTracking : MonoBehaviour
     bool savingDone;
     string saved ="";
     public string path = "Assets/Scripts/Tracking/tracking.txt";
-
+    public int updatesPerSecond = 5;
     DataPoints dataPoints;
 
     // Start is called before the first frame update
@@ -21,19 +21,23 @@ public class EyeTracking : MonoBehaviour
         dataPoints = new DataPoints();
         if (shouldRecord)
         {
-            //MLEyes.Start();
+           //MLEyes.Start();
         }
     }
 
     void OnDisable()
     {
-        //MLEyes.Stop();
+        MLEyes.Stop();
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (shouldRecord && !recording) //&& MLEyes.IsStarted)
+        if (!MLEyes.IsStarted)
+        {
+            MLEyes.Start();
+        }
+        if (shouldRecord && !recording && MLEyes.IsStarted)
         {
             StartCoroutine("WriteData");
         }
@@ -57,10 +61,10 @@ public class EyeTracking : MonoBehaviour
         savingDone = false;
         recording = true;
         TrackedPoint point = new TrackedPoint();
-        point.pos = new Vector3(Random.Range(-2f, 2f), Random.Range(-2f, 2f), Random.Range(-2f, 2f));
+        point.pos = MLEyes.FixationPoint;//new Vector3(Random.Range(-2f, 2f), Random.Range(-2f, 2f), Random.Range(-2f, 2f));
         point.time = Time.time;
         dataPoints.points.Add(point);
-        yield return new WaitForSeconds(.5f);
+        yield return new WaitForSeconds(1/updatesPerSecond);
         saved = JsonUtility.ToJson(dataPoints);
         recording = false;
     }
