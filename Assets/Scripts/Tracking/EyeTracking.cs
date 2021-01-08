@@ -7,6 +7,7 @@ using UnityEngine.XR.MagicLeap;
 
 public class EyeTracking : MonoBehaviour
 {
+    public Camera cam;
     public bool shouldRecord;
     bool recording;
     bool savingDone;
@@ -54,11 +55,6 @@ public class EyeTracking : MonoBehaviour
                 StopCoroutine("WriteData");
                 SaveAsJson();
                 List<TrackedPoint> points = LoadFromJson();
-                foreach(TrackedPoint p in points)
-                {
-                    Debug.Log(p.time + ": " + p.pos);
-                    
-                }
                 ShowPoints(points);
             }
         }
@@ -71,6 +67,7 @@ public class EyeTracking : MonoBehaviour
         TrackedPoint point = new TrackedPoint();
         point.pos = MLEyes.FixationPoint;//new Vector3(Random.Range(-2f, 2f), Random.Range(-2f, 2f), Random.Range(-2f, 2f));
         point.time = Time.time;
+        point.camPos = cam.transform.position;
         dataPoints.points.Add(point);
         yield return new WaitForSeconds(1/updatesPerSecond);
         saved = JsonUtility.ToJson(dataPoints);
@@ -79,7 +76,6 @@ public class EyeTracking : MonoBehaviour
 
     void SaveAsJson()
     {
-        //save joint settings
         string values = "";
         foreach (TrackedPoint pt in dataPoints.points)
         {
@@ -113,7 +109,31 @@ public class EyeTracking : MonoBehaviour
     {
         foreach (TrackedPoint point in points) 
         {
+            MeshCorrected(point);
             GameObject.Instantiate(pointIndicator, point.pos, Quaternion.identity);
         }
+    }
+
+    void MeshCorrected(TrackedPoint point)
+    {
+        //get view direction
+        Vector3 dir = point.pos - point.camPos;
+
+        RaycastHit hit;
+        if (Physics.Raycast(cam.transform.position, dir, out hit, Mathf.Infinity))
+        {
+            point.pos = hit.point;
+        }
+        else
+        {
+            Debug.Log("Nothing hit");
+        }
+        /*
+        //try to catch points outside room
+        else if(Physics.Raycast(cam.transform.position, -dir, out hit, Mathf.Infinity))
+        {
+            point.pos = hit.point;
+        }
+        */
     }
 }

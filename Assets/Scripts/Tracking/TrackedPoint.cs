@@ -7,6 +7,7 @@ using UnityEngine;
 public class TrackedPoint
 {
     public Vector3 pos;
+    public Vector3 camPos;
     public float time;
 }
 
