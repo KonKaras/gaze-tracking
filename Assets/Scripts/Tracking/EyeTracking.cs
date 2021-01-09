@@ -16,10 +16,15 @@ public class EyeTracking : MonoBehaviour
     public int updatesPerSecond = 5;
     DataPoints dataPoints;
     public GameObject pointIndicator;
+    ParticleSystem particleSystem;
+    //calculate color based on tracked points in this radius
+    public float neighborRadius = .5f;
+    public float neighborPointWeight = 0.05f;
 
     // Start is called before the first frame update
     void Start()
     {
+        particleSystem = GetComponent<ParticleSystem>();
         dataPoints = new DataPoints();
         if (shouldRecord)
         {
@@ -107,11 +112,52 @@ public class EyeTracking : MonoBehaviour
 
     void ShowPoints(List<TrackedPoint> points)
     {
+        /*
         foreach (TrackedPoint point in points) 
         {
             MeshCorrected(point);
             GameObject.Instantiate(pointIndicator, point.pos, Quaternion.identity);
         }
+        */
+        SpawnParticles(points);
+    }
+
+    void SpawnParticles(List<TrackedPoint> points)
+    {
+        Debug.Log(particleSystem.particleCount);
+        List<ParticleSystem.Particle> particles = new List<ParticleSystem.Particle>();
+        foreach (TrackedPoint point in points)
+        {
+            ParticleSystem.Particle particle = new ParticleSystem.Particle();
+            particle.position = point.pos;
+            particle.startColor = ComputeColor(GetSurroundingPoints(points, point));
+            particle.velocity = Vector3.zero;
+            particles.Add(particle);
+        }
+
+        particleSystem.SetParticles(particles.ToArray(), particles.Count);
+        particleSystem.Play();
+        Debug.Log(particleSystem.particleCount);
+    }
+
+    Color ComputeColor(int neighbors)
+    {
+        
+        Color color = Color.Lerp(Color.blue, Color.red, neighbors*neighborPointWeight);
+
+        return color;
+    }
+
+    int GetSurroundingPoints(List<TrackedPoint> points, TrackedPoint toBeColored)
+    {
+        int numPointsInRange = 0;
+        foreach(TrackedPoint compare in points)
+        {
+            if((compare.pos - toBeColored.pos).magnitude <= neighborRadius){
+                numPointsInRange++;
+            }
+        }
+        return numPointsInRange;
     }
 
     void MeshCorrected(TrackedPoint point)
