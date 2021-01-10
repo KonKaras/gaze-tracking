@@ -10,41 +10,75 @@ public class EyeTracking : MonoBehaviour
     public Camera cam;
     public bool shouldRecord;
     bool recording;
+    bool startedRecording;
     bool savingDone;
     string saved ="";
     public string path = "Assets/Scripts/Tracking/tracking.txt";
     public int updatesPerSecond = 5;
     DataPoints dataPoints;
+    public bool showLiveGaze;
     public GameObject pointIndicator;
     ParticleSystem particleSystem;
     //calculate color based on tracked points in this radius
     public float neighborRadius = .5f;
     public float neighborPointWeight = 0.05f;
+    MLInput.Controller controller;
 
     // Start is called before the first frame update
     void Start()
     {
         particleSystem = GetComponent<ParticleSystem>();
         dataPoints = new DataPoints();
-        if (shouldRecord)
+
+        MLInput.Start();
+        MLInput.OnControllerButtonDown += OnButtonDown;
+        controller = MLInput.GetController(MLInput.Hand.Left);
+    }
+
+    void OnButtonDown(byte controller, MLInput.Controller.Button button)
+    {
+        if (button == MLInput.Controller.Button.Bumper)
         {
-           //MLEyes.Start();
+            if (!startedRecording)
+            {
+                if (!MLEyes.IsStarted)
+                {
+                    MLEyes.Start();
+                }
+                Debug.Log("Recording Started");
+                startedRecording = true;
+                StartCoroutine("WriteData");
+            }
+            else
+            {
+                StopCoroutine("WriteData");
+                MLEyes.Stop();
+                SaveAsJson();
+                Debug.Log("Recording Stopped, Data Saved");
+                List<TrackedPoint> points = LoadFromJson();
+                ShowPoints(points);
+                startedRecording = false;
+            }
         }
     }
 
     void OnDisable()
     {
         MLEyes.Stop();
+        MLInput.Stop();
+        MLInput.OnControllerButtonDown -= OnButtonDown;
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
+        //for debugging, delete later
         if (Input.GetKeyDown(KeyCode.A))
         {
             ShowPoints(LoadFromJson());
         }
 
+        /*
         if (shouldRecord && !recording)
         {
             if (!MLEyes.IsStarted)
@@ -63,6 +97,7 @@ public class EyeTracking : MonoBehaviour
                 ShowPoints(points);
             }
         }
+        */
     }
 
     IEnumerator WriteData()
@@ -112,14 +147,14 @@ public class EyeTracking : MonoBehaviour
 
     void ShowPoints(List<TrackedPoint> points)
     {
-        /*
+        //TODO: replace with particle system or computeshader
         foreach (TrackedPoint point in points) 
         {
             MeshCorrected(point);
             GameObject.Instantiate(pointIndicator, point.pos, Quaternion.identity);
         }
-        */
-        SpawnParticles(points);
+        
+        //SpawnParticles(points);
     }
 
     void SpawnParticles(List<TrackedPoint> points)
