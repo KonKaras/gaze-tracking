@@ -46,8 +46,8 @@ public class EyeTracking : MonoBehaviour
                     MLEyes.Start();
                 }
                 Debug.Log("Recording Started");
+                shouldRecord = true;
                 startedRecording = true;
-                StartCoroutine("WriteData");
             }
             else
             {
@@ -78,26 +78,11 @@ public class EyeTracking : MonoBehaviour
             ShowPoints(LoadFromJson());
         }
 
-        /*
+        
         if (shouldRecord && !recording)
         {
-            if (!MLEyes.IsStarted)
-            {
-                MLEyes.Start();
-            }
             StartCoroutine("WriteData");
         }
-        else
-        {
-            if (!shouldRecord && !savingDone)
-            {
-                StopCoroutine("WriteData");
-                SaveAsJson();
-                List<TrackedPoint> points = LoadFromJson();
-                ShowPoints(points);
-            }
-        }
-        */
     }
 
     IEnumerator WriteData()
@@ -150,7 +135,7 @@ public class EyeTracking : MonoBehaviour
         //TODO: replace with particle system or computeshader
         foreach (TrackedPoint point in points) 
         {
-            MeshCorrected(point);
+            //MeshCorrected(point);
             GameObject.Instantiate(pointIndicator, point.pos, Quaternion.identity);
         }
         
