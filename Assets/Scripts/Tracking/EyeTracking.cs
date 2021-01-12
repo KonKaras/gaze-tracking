@@ -81,6 +81,7 @@ public class EyeTracking : MonoBehaviour
         
         if (shouldRecord && !recording)
         {
+            if(MLEyes.IsStarted && !MLEyes.LeftEye.IsBlinking && !MLEyes.RightEye.IsBlinking)
             StartCoroutine("WriteData");
         }
     }
@@ -135,7 +136,7 @@ public class EyeTracking : MonoBehaviour
         //TODO: replace with particle system or computeshader
         foreach (TrackedPoint point in points) 
         {
-            //MeshCorrected(point);
+            MeshCorrected(point);
             GameObject.Instantiate(pointIndicator, point.pos, Quaternion.identity);
         }
         
@@ -189,10 +190,12 @@ public class EyeTracking : MonoBehaviour
         if (Physics.Raycast(cam.transform.position, dir, out hit, Mathf.Infinity))
         {
             point.pos = hit.point;
+            Debug.DrawRay(point.camPos, dir, Color.green);
+            Debug.Log("Matched!");
         }
         else
         {
-            Debug.Log("Nothing hit");
+            Debug.Log("Nothing hit!");
         }
         /*
         //try to catch points outside room
