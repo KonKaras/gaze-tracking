@@ -22,11 +22,14 @@ public class EyeTracking : MonoBehaviour
     //calculate color based on tracked points in this radius
     public float neighborRadius = .5f;
     public float neighborPointWeight = 0.05f;
+
+    Shader shader;
     MLInput.Controller controller;
 
     // Start is called before the first frame update
     void Start()
     {
+        shader = Shader.Find("Standard");
         particleSystem = GetComponent<ParticleSystem>();
         dataPoints = new DataPoints();
 
@@ -137,7 +140,16 @@ public class EyeTracking : MonoBehaviour
         foreach (TrackedPoint point in points) 
         {
             MeshCorrected(point);
-            GameObject.Instantiate(pointIndicator, point.pos, Quaternion.identity);
+            GameObject obj = Instantiate(pointIndicator, point.pos, Quaternion.identity);
+
+            Color color = ComputeColor(ComputeWeight(points, point));
+            MeshRenderer renderer = obj.GetComponent<MeshRenderer>();
+
+            Material newMat = renderer.material;
+            float alpha = newMat.color.a;
+            newMat.color = new Color(color.r, color.g, color.b, alpha);
+
+            renderer.material = newMat;
         }
         
         //SpawnParticles(points);
@@ -151,7 +163,7 @@ public class EyeTracking : MonoBehaviour
         {
             ParticleSystem.Particle particle = new ParticleSystem.Particle();
             particle.position = point.pos;
-            particle.startColor = ComputeColor(GetSurroundingPoints(points, point));
+            particle.startColor = ComputeColor(ComputeWeight(points, point));
             particle.velocity = Vector3.zero;
             particles.Add(particle);
         }
@@ -161,24 +173,29 @@ public class EyeTracking : MonoBehaviour
         Debug.Log(particleSystem.particleCount);
     }
 
-    Color ComputeColor(int neighbors)
+    Color ComputeColor(float weight)
     {
-        
-        Color color = Color.Lerp(Color.blue, Color.red, neighbors*neighborPointWeight);
-
-        return color;
+        Color start = Color.blue;
+        Color end = Color.green;
+        if (weight > .5f)
+        {
+            start = Color.green;
+            end = Color.red;
+        }
+         return Color.Lerp(start, end, weight);
     }
 
-    int GetSurroundingPoints(List<TrackedPoint> points, TrackedPoint toBeColored)
+    float ComputeWeight(List<TrackedPoint> points, TrackedPoint toBeColored)
     {
-        int numPointsInRange = 0;
+        float weight = 0;
         foreach(TrackedPoint compare in points)
         {
-            if((compare.pos - toBeColored.pos).magnitude <= neighborRadius){
-                numPointsInRange++;
+            float dist = (compare.pos - toBeColored.pos).magnitude;
+            if (compare != toBeColored && dist <= neighborRadius){
+                weight += (1 - (neighborRadius - dist) / neighborRadius) * neighborPointWeight;
             }
         }
-        return numPointsInRange;
+        return weight;
     }
 
     void MeshCorrected(TrackedPoint point)
