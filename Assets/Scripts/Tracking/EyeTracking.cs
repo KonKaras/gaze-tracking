@@ -8,6 +8,7 @@ using UnityEngine.XR.MagicLeap;
 public class EyeTracking : MonoBehaviour
 {
     public Camera cam;
+    public UnityEngine.UI.Slider slider;
     public bool shouldRecord;
     bool recording;
     bool startedRecording;
@@ -23,6 +24,8 @@ public class EyeTracking : MonoBehaviour
     public float neighborRadius = .5f;
     public float neighborPointWeight = 0.05f;
 
+    List<GameObject> spawnedPoints;
+
     Shader shader;
     MLInput.Controller controller;
 
@@ -30,6 +33,7 @@ public class EyeTracking : MonoBehaviour
     void Start()
     {
         shader = Shader.Find("Standard");
+        spawnedPoints = new List<GameObject>();
         particleSystem = GetComponent<ParticleSystem>();
         dataPoints = new DataPoints();
 
@@ -136,11 +140,13 @@ public class EyeTracking : MonoBehaviour
 
     void ShowPoints(List<TrackedPoint> points)
     {
+        UI ui = GameObject.Find("Canvas").GetComponent<UI>();
         //TODO: replace with particle system or computeshader
         foreach (TrackedPoint point in points) 
         {
             MeshCorrected(point);
             GameObject obj = Instantiate(pointIndicator, point.pos, Quaternion.identity);
+            //obj.GetComponent<TrackedPoint>().time = point.time;
 
             Color color = ComputeColor(ComputeWeight(points, point));
             MeshRenderer renderer = obj.GetComponent<MeshRenderer>();
@@ -150,8 +156,14 @@ public class EyeTracking : MonoBehaviour
             newMat.color = new Color(color.r, color.g, color.b, alpha);
 
             renderer.material = newMat;
+
+            ui.points.Add(obj);
         }
-        
+
+        ui.maxTime = points[points.Count - 1].time;
+        ui.pointsData = points;
+
+        slider.gameObject.SetActive(true);
         //SpawnParticles(points);
     }
 
@@ -207,8 +219,8 @@ public class EyeTracking : MonoBehaviour
         if (Physics.Raycast(cam.transform.position, dir, out hit, Mathf.Infinity))
         {
             point.pos = hit.point;
-            Debug.DrawRay(point.camPos, dir, Color.green);
-            Debug.Log("Matched!");
+            //Debug.DrawRay(point.camPos, dir, Color.green);
+            //Debug.Log("Matched!");
         }
         else
         {
