@@ -28,18 +28,15 @@ public class UI : MonoBehaviour
     public void HandleTime(float value)
     {
         float selectedTime = value * maxTime;
-        Debug.Log(value);
         
-        for (int i = 0; i < points.Count; ++i)
+        for (int i = 0; i < points.Count; i++)
         {
             if(pointsData[i].time <= selectedTime)
             {
-                //Debug.Log(pointsData[i].time);
                 points[i].SetActive(true);
             }
             else
             {
-                Debug.Log(pointsData[i].time);
                 points[i].SetActive(false);
             }
         
