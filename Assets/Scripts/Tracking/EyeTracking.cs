@@ -29,9 +29,12 @@ public class EyeTracking : MonoBehaviour
     Shader shader;
     MLInput.Controller controller;
 
+    UI ui;
+
     // Start is called before the first frame update
     void Start()
     {
+        UI ui = GameObject.Find("Canvas").GetComponent<UI>();
         shader = Shader.Find("Standard");
         spawnedPoints = new List<GameObject>();
         particleSystem = GetComponent<ParticleSystem>();
@@ -55,6 +58,7 @@ public class EyeTracking : MonoBehaviour
                 Debug.Log("Recording Started");
                 shouldRecord = true;
                 startedRecording = true;
+                ui.SetRecordingText(startedRecording);
             }
             else
             {
@@ -65,6 +69,7 @@ public class EyeTracking : MonoBehaviour
                 List<TrackedPoint> points = LoadFromJson();
                 ShowPoints(points);
                 startedRecording = false;
+                ui.SetRecordingText(startedRecording);
             }
         }
     }
@@ -140,7 +145,6 @@ public class EyeTracking : MonoBehaviour
 
     void ShowPoints(List<TrackedPoint> points)
     {
-        UI ui = GameObject.Find("Canvas").GetComponent<UI>();
         //TODO: replace with particle system or computeshader
         foreach (TrackedPoint point in points) 
         {

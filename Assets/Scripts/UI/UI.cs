@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class UI : MonoBehaviour
 {
+    public TextMeshProUGUI text;
     public List<GameObject> points;
     public List<TrackedPoint> pointsData;
     public float maxTime;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -17,6 +20,12 @@ public class UI : MonoBehaviour
     private void OnEnable()
     {
         //HandleTime(1);
+    }
+
+    public void SetRecordingText(bool isRecording)
+    {
+        if (isRecording) text.text = "Recording...";
+        else text.text = "Tap Left Bumper to Record";
     }
 
     // Update is called once per frame
