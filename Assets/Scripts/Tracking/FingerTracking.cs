@@ -18,7 +18,7 @@ public class FingerTracking : MonoBehaviour
     void Start()
     {
         MLHandTracking.Start();
-        UI ui = GameObject.Find("Canvas").GetComponent<UI>();
+        ui = GameObject.Find("Canvas").GetComponent<UI>();
         raycast = ui.gameObject.GetComponent<GraphicRaycaster>();
     }
 
@@ -46,15 +46,14 @@ public class FingerTracking : MonoBehaviour
                 {
                     if (parent.GetComponent<Slider>() != null)
                     {
-                        Debug.Log(parent.gameObject.name);
                         Slider slider = parent.GetComponent<Slider>();
-                        Debug.Log("slider handle at " + slider.handleRect.position);
-                        Vector2 sliderInSP = cam.WorldToScreenPoint(slider.handleRect.position);
-                        Vector2 tipInSP = cam.WorldToScreenPoint(handIndexTipPos);
+                        Vector2 sliderInSP = cam.WorldToScreenPoint(slider.handleRect.position).normalized;
+                        Vector2 tipInSP = cam.WorldToScreenPoint(handIndexTipPos).normalized;
                         //float newValue = Mathf.Abs((cam.WorldToScreenPoint(slider.handleRect.position).x - cam.WorldToScreenPoint(handIndexTipPos).x));
-                        Debug.Log("slider in sp " + sliderInSP);
-                        Debug.Log("tip in sp " + tipInSP);
-                        //ui.HandleTime(newValue);//Mathf.Abs(((Vector2)cam.WorldToScreenPoint(slider.handleRect.position) - eventData.position).normalized.magnitude));
+
+                        float newValue = Mathf.Abs(sliderInSP.x - tipInSP.x);
+                        Debug.Log(newValue);
+                        ui.HandleTime(newValue);//Mathf.Abs(((Vector2)cam.WorldToScreenPoint(slider.handleRect.position) - eventData.position).normalized.magnitude));
                         
                         gotSlider = true;
                         break;
