@@ -10,6 +10,7 @@ public class UI : MonoBehaviour
     public List<GameObject> points;
     public List<TrackedPoint> pointsData;
     public float maxTime;
+    public Slider slider;
 
     // Start is called before the first frame update
     void Start()
@@ -36,6 +37,7 @@ public class UI : MonoBehaviour
 
     public void HandleTime(float value)
     {
+        slider.value = value;
         float selectedTime = value * maxTime;
         
         for (int i = 0; i < points.Count; i++)
