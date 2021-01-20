@@ -34,7 +34,7 @@ public class EyeTracking : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        UI ui = GameObject.Find("Canvas").GetComponent<UI>();
+        ui = GameObject.Find("Canvas").GetComponent<UI>();
         shader = Shader.Find("Standard");
         spawnedPoints = new List<GameObject>();
         particleSystem = GetComponent<ParticleSystem>();
@@ -160,7 +160,7 @@ public class EyeTracking : MonoBehaviour
             newMat.color = new Color(color.r, color.g, color.b, alpha);
 
             renderer.material = newMat;
-
+            Debug.Log(obj);
             ui.points.Add(obj);
         }
 
