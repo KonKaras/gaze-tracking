@@ -15,6 +15,7 @@ public class FingerTracking : MonoBehaviour
     public Camera cam;
     GameObject lastTouchedUI = null;
     Slider slider;
+    Transform beginIndicator;
 
     // Start is called before the first frame update
     void Start()
@@ -22,6 +23,7 @@ public class FingerTracking : MonoBehaviour
         MLHandTracking.Start();
         ui = GameObject.Find("Canvas").GetComponent<UI>();
         slider = ui.transform.Find("Slider").GetComponent<Slider>();
+        beginIndicator = slider.transform.Find("BeginIndicator");
         raycast = ui.gameObject.GetComponent<GraphicRaycaster>();
     }
 
@@ -104,35 +106,42 @@ public class FingerTracking : MonoBehaviour
                 bool gotSlider = false;
                 if (Physics.Raycast(handIndexTipPos, handIndexTipDir, out hit, Mathf.Infinity))
                 {
-                    if(hit.transform.gameObject.layer == 5)
+                    if (hit.transform.gameObject.layer == 5)
                     {
                         Debug.Log(hit.transform.gameObject.name);
 
-                                lastTouchedUI = hit.transform.gameObject;
-                                lastTouchedUI.GetComponent<Image>().color = Color.green;
-
-                                Vector2 sliderInVP = cam.WorldToViewportPoint(slider.handleRect.position);
-                                Vector2 tipInVP = cam.WorldToViewportPoint(handIndexTipPos);
-
-                                Transform beginIndicator = slider.transform.Find("BeginIndicator");
-                                Vector2 beginInVP = cam.WorldToViewportPoint(beginIndicator.position);
-
-                                float sliderWidth = slider.gameObject.GetComponent<RectTransform>().rect.width;
-                                Vector2 endInSP = cam.WorldToScreenPoint(beginIndicator.position) + beginIndicator.right.normalized * sliderWidth;
-                                Vector2 endInVP = cam.ScreenToViewportPoint(endInSP);
-                                Debug.Log("beginInSP " + cam.WorldToScreenPoint(beginIndicator.position));
-                                Debug.Log("beginInVP " + beginInVP);
-                                Debug.Log("endInSP " + endInSP);
-                                Debug.Log("endInVP " + endInVP);
-                                Debug.Log("view pos " + tipInVP);
-                                //float newValue = Mathf.Abs((cam.WorldToScreenPoint(slider.handleRect.position).x - cam.WorldToScreenPoint(handIndexTipPos).x));
-
-                                float newValue = Mathf.Abs(tipInVP.x - beginInVP.x);
-                                Debug.Log("slider value" + newValue);
-                                ui.HandleTime(newValue);//Mathf.Abs(((Vector2)cam.WorldToScreenPoint(slider.handleRect.position) - eventData.position).normalized.magnitude));
-
-                                gotSlider = true;
+                        lastTouchedUI = hit.transform.gameObject;
+                        lastTouchedUI.GetComponent<Image>().color = Color.green;
+                        Debug.Log("hit point " + hit.point);
+                        Debug.Log("beginIndicator " + beginIndicator.position);
+                        Vector3 hitDifference = hit.point - lastTouchedUI.transform.position;
+                        float newValue = hitDifference.magnitude;
+                        beginIndicator.Translate(hit.point);
                         
+                        /*
+                        Vector2 sliderInVP = cam.WorldToViewportPoint(slider.handleRect.position);
+                        Vector2 tipInVP = cam.WorldToViewportPoint(handIndexTipPos);
+
+                        Transform beginIndicator = slider.transform.Find("BeginIndicator");
+                        Vector2 beginInVP = cam.WorldToViewportPoint(beginIndicator.position);
+
+                        float sliderWidth = slider.gameObject.GetComponent<RectTransform>().rect.width;
+                        Vector2 endInSP = cam.WorldToScreenPoint(beginIndicator.position) + beginIndicator.right.normalized * sliderWidth;
+                        Vector2 endInVP = cam.ScreenToViewportPoint(endInSP);
+                        Debug.Log("beginInSP " + cam.WorldToScreenPoint(beginIndicator.position));
+                        Debug.Log("beginInVP " + beginInVP);
+                        Debug.Log("endInSP " + endInSP);
+                        Debug.Log("endInVP " + endInVP);
+                        Debug.Log("view pos " + tipInVP);
+                        //float newValue = Mathf.Abs((cam.WorldToScreenPoint(slider.handleRect.position).x - cam.WorldToScreenPoint(handIndexTipPos).x));
+
+                        float newValue = Mathf.Abs(tipInVP.x - beginInVP.x);
+                        */
+                        Debug.Log("slider value" + newValue);
+                        //ui.HandleTime(newValue);//Mathf.Abs(((Vector2)cam.WorldToScreenPoint(slider.handleRect.position) - eventData.position).normalized.magnitude));
+
+                        gotSlider = true;
+
                     }
                 }
                 else

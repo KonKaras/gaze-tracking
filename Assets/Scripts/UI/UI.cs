@@ -38,6 +38,7 @@ public class UI : MonoBehaviour
     public void HandleTime(float value)
     {
         slider.value = value;
+        //slider.value = Mathf.Clamp(slider.value, 0f, 1f);
         float selectedTime = value * maxTime;
         
         for (int i = 0; i < points.Count; i++)
