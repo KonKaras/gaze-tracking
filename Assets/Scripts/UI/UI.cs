@@ -15,7 +15,7 @@ public class UI : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        points = new List<GameObject>();
     }
 
     private void OnEnable()
