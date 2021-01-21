@@ -148,18 +148,24 @@ public class EyeTracking : MonoBehaviour
         //TODO: replace with particle system or computeshader
         foreach (TrackedPoint point in points) 
         {
-            MeshCorrected(point);
+            Vector3 normal = Vector3.zero;
+            MeshCorrected(point, ref normal);
             GameObject obj = Instantiate(pointIndicator, point.pos, Quaternion.identity);
             //obj.GetComponent<TrackedPoint>().time = point.time;
+            Debug.Log(normal);
+            obj.transform.rotation = Quaternion.FromToRotation(obj.transform.forward, normal);
+            obj.transform.Translate(obj.transform.forward.normalized * 1 / 10);
 
             Color color = ComputeColor(ComputeWeight(points, point));
-            MeshRenderer renderer = obj.GetComponent<MeshRenderer>();
+            SpriteRenderer renderer = obj.GetComponent<SpriteRenderer>();
 
-            Material newMat = renderer.material;
-            float alpha = newMat.color.a;
-            newMat.color = new Color(color.r, color.g, color.b, alpha);
+            float alpha = renderer.color.a;
+            renderer.color = new Color(color.r, color.g, color.b, renderer.color.a);
+            //Material newMat = renderer.material;
+            //float alpha = newMat.color.a;
+            //newMat.color = new Color(color.r, color.g, color.b, alpha);
 
-            renderer.material = newMat;
+            //renderer.material = newMat;
             Debug.Log(obj);
             ui.points.Add(obj);
         }
@@ -214,7 +220,7 @@ public class EyeTracking : MonoBehaviour
         return weight;
     }
 
-    void MeshCorrected(TrackedPoint point)
+    void MeshCorrected(TrackedPoint point, ref Vector3 normal)
     {
         //get view direction
         Vector3 dir = point.pos - point.camPos;
@@ -223,8 +229,7 @@ public class EyeTracking : MonoBehaviour
         if (Physics.Raycast(cam.transform.position, dir, out hit, Mathf.Infinity))
         {
             point.pos = hit.point;
-            //Debug.DrawRay(point.camPos, dir, Color.green);
-            //Debug.Log("Matched!");
+            normal = hit.normal;
         }
         else
         {
