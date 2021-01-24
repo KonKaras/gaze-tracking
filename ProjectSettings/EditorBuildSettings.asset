@@ -9,6 +9,8 @@ EditorBuildSettings:
     path: Assets/Scenes/HelloCube.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
   m_configObjects:
+    Unity.XR.Oculus.Settings: {fileID: 11400000, guid: bdb7bccfdd9e60f4db903dea44b7ecd0,
+      type: 2}
     com.unity.xr.magicleap.magic_leap_settings: {fileID: 11400000, guid: ee42a0332c1d0744584e86b8160aa228,
       type: 2}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 2ba4dbd235ed941bb8fdb5a40ab00f22,

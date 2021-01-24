@@ -11,6 +11,7 @@ public class UI : MonoBehaviour
     public List<TrackedPoint> pointsData;
     public float maxTime;
     public Slider slider;
+    public TextMeshProUGUI currentTime;
 
     // Start is called before the first frame update
     void Start()
@@ -40,6 +41,7 @@ public class UI : MonoBehaviour
         slider.value = value;
         //slider.value = Mathf.Clamp(slider.value, 0f, 1f);
         float selectedTime = value * maxTime;
+        currentTime.text = "Time: " + System.Math.Round(selectedTime, 2) + "s";
         
         for (int i = 0; i < points.Count; i++)
         {

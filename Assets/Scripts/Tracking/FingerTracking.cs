@@ -101,7 +101,7 @@ public class FingerTracking : MonoBehaviour
                 //if(!gotSlider && lastTouchedUI != null) lastTouchedUI.gameObject.GetComponent<Image>().color = Color.grey;
 
                 Debug.DrawRay(handIndexTipPos, handIndexTipDir*10, Color.red);
-                Debug.Log("Scanning...");
+                //Debug.Log("Scanning...");
                 RaycastHit hit;
                 bool gotSlider = false;
                 if (Physics.Raycast(handIndexTipPos, handIndexTipDir, out hit, Mathf.Infinity))

@@ -21,8 +21,14 @@ public class EyeTracking : MonoBehaviour
     public GameObject pointIndicator;
     ParticleSystem particleSystem;
     //calculate color based on tracked points in this radius
-    public float neighborRadius = .5f;
-    public float neighborPointWeight = 0.05f;
+    public float neighborRadius;
+    public float neighborPointWeight;
+
+    public Color least;
+    public Color middleLower;
+    public Color middle;
+    public Color middleUpper;
+    public Color most;
 
     List<GameObject> spawnedPoints;
 
@@ -158,7 +164,7 @@ public class EyeTracking : MonoBehaviour
 
             Color color = ComputeColor(ComputeWeight(points, point));
             SpriteRenderer renderer = obj.GetComponent<SpriteRenderer>();
-
+            GameObject.Find("Reconstruction").GetComponent<MeshManager>().InitMeshes();
             float alpha = renderer.color.a;
             renderer.color = new Color(color.r, color.g, color.b, renderer.color.a);
             //Material newMat = renderer.material;
@@ -197,14 +203,31 @@ public class EyeTracking : MonoBehaviour
 
     Color ComputeColor(float weight)
     {
-        Color start = Color.blue;
-        Color end = Color.green;
-        if (weight > .5f)
+        /*
+        Color start = least;
+        Color end = middleLower;
+
+        if (weight > .75f)
         {
-            start = Color.green;
-            end = Color.red;
+            start = middleUpper;
+            end = most;
+        }else if(weight > .5f)
+        {
+            start = middle;
+            end = middleUpper;
+        }else if(weight > .25f)
+        {
+            start = middleLower;
+            end = middle;
         }
-         return Color.Lerp(start, end, weight);
+
+        return Color.Lerp(start, end, weight);
+        */
+        if (weight > .8f) return most;
+        else if (weight > .6f) return middleUpper;
+        else if (weight > .4f) return middle;
+        else if (weight > .2f) return middleLower;
+        return least;
     }
 
     float ComputeWeight(List<TrackedPoint> points, TrackedPoint toBeColored)
@@ -214,7 +237,7 @@ public class EyeTracking : MonoBehaviour
         {
             float dist = (compare.pos - toBeColored.pos).magnitude;
             if (compare != toBeColored && dist <= neighborRadius){
-                weight += (1 - (neighborRadius - dist) / neighborRadius) * neighborPointWeight;
+                weight += ((neighborRadius - dist) / neighborRadius) * neighborPointWeight;
             }
         }
         return weight;
