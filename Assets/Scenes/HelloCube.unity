@@ -143,8 +143,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ui_text: {fileID: 618594456}
   Camera: {fileID: 642236833}
-  minSliderObj: {fileID: 0}
-  maxSliderObj: {fileID: 0}
+  minSliderObj: {fileID: 1699874310}
+  maxSliderObj: {fileID: 677657305}
 --- !u!1 &618594455
 GameObject:
   m_ObjectHideFlags: 0
@@ -196,7 +196,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: New Text
+  m_Text: max Handle selected
 --- !u!222 &618594457
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -230,6 +230,18 @@ Camera:
     type: 3}
   m_PrefabInstance: {fileID: 1155836708}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &677657305 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7070598439493393807, guid: 8a14d326f4860ed4cb059095cb50cab5,
+    type: 3}
+  m_PrefabInstance: {fileID: 7070598440640627418}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8df81c8c8e7be4f4db0242bed9145ab4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -825,6 +837,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1699874310 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7070598439244252587, guid: 8a14d326f4860ed4cb059095cb50cab5,
+    type: 3}
+  m_PrefabInstance: {fileID: 7070598440640627418}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8d043b5e830b324abd2e168c5f5fc0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &2100328125
 PrefabInstance:
   m_ObjectHideFlags: 0
