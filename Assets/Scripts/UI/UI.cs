@@ -43,7 +43,7 @@ public class UI : MonoBehaviour
         float selectedTime = value * maxTime;
         currentTime.text = "Time: " + System.Math.Round(selectedTime, 2) + "s";
         
-        for (int i = 0; i < points.Count; i++)
+        for (int i = 0; i < pointsData.Count; i++)
         {
             if(pointsData[i].time <= selectedTime)
             {

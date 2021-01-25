@@ -28,7 +28,7 @@ public class MeshColoring : MonoBehaviour
         mesh = GetComponent<MeshFilter>().mesh;
 
         vertices = mesh.vertices;
-        colors = mesh.colors;
+        mesh.colors = new Color[vertices.Length];
         triangles = mesh.triangles;
 
         attentionPerTriangle = new Dictionary<int, int>();
@@ -40,20 +40,12 @@ public class MeshColoring : MonoBehaviour
         isInitialized = true;
     }
 
-    public void SetDict(Dictionary<int, List<GameObject>> dict)
-    {
-
-    }
-
-    public void OnTimerValueChanged()
-    {
-        
-    }
-
     public void UpdateColor()
     {
         if (isInitialized)
         {
+            int ver = 0;
+            Color[] colors = new Color[mesh.colors.Length];
             foreach (int triangle in associatedPointsPerTriangle.Keys)
             {
                 int attention = 0;
@@ -70,13 +62,15 @@ public class MeshColoring : MonoBehaviour
                     }
                 }
                 attentionPerTriangle[triangle] = attention;
-                Color triangleColor = manager.colorGradient.Evaluate(attention / manager.threshold);
+                Color triangleColor = manager.colorGradient.Evaluate(attention / (float)manager.GetMaxAttention());
                 int[] vertices = VerticesFromTriangle(triangle);
                 foreach (int v in vertices)
                 {
-                    mesh.colors[v] = triangleColor;
+                    colors[v] = triangleColor;
+                    ver = v;
                 }
             }
+            mesh.colors = colors;
         }
     } 
 
