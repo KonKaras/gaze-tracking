@@ -14,7 +14,7 @@ public class MeshColoring : MonoBehaviour
     Mesh mesh;
     bool isInitialized = false;
     Dictionary<int, int> attentionPerTriangle;
-    Dictionary<int, List<GameObject>> associatedPointsPerTriangle;
+    public Dictionary<int, List<GameObject>> associatedPointsPerTriangle;
 
 
     // Start is called before the first frame update
@@ -22,7 +22,7 @@ public class MeshColoring : MonoBehaviour
     {
     }
 
-    public void Initialize()
+    public void Initialize(Dictionary<int, List<GameObject>> dict)
     {
         manager = transform.parent.GetComponent<MeshManager>();
         mesh = GetComponent<MeshFilter>().mesh;
@@ -32,19 +32,17 @@ public class MeshColoring : MonoBehaviour
         triangles = mesh.triangles;
 
         attentionPerTriangle = new Dictionary<int, int>();
-        associatedPointsPerTriangle = new Dictionary<int, List<GameObject>>();
-
+        associatedPointsPerTriangle = dict;
+        foreach (int triangle in associatedPointsPerTriangle.Keys)
+        {
+            attentionPerTriangle.Add(triangle, 0);
+        }
         isInitialized = true;
     }
 
-
-    // Update is called once per frame
-    void FixedUpdate()
+    public void SetDict(Dictionary<int, List<GameObject>> dict)
     {
-        if (isInitialized)
-        {
-            UpdateColor();
-        }
+
     }
 
     public void OnTimerValueChanged()
@@ -52,25 +50,41 @@ public class MeshColoring : MonoBehaviour
         
     }
 
-    void UpdateColor()
+    public void UpdateColor()
     {
-        foreach(int triangle in associatedPointsPerTriangle.Keys)
+        if (isInitialized)
         {
-            int attention = 0;
-            List<GameObject> trackedPoints = associatedPointsPerTriangle[triangle];
-            foreach(GameObject obj in trackedPoints)
+            foreach (int triangle in associatedPointsPerTriangle.Keys)
             {
-                if (obj.activeSelf)
+                int attention = 0;
+                List<GameObject> trackedPoints = associatedPointsPerTriangle[triangle];
+                foreach (GameObject obj in trackedPoints)
                 {
-                    attention++;
+                    if (obj.activeSelf)
+                    {
+                        attention++;
+                    }
+                    else
+                    {
+                        attention--;
+                    }
                 }
-                else
+                attentionPerTriangle[triangle] = attention;
+                Color triangleColor = manager.colorGradient.Evaluate(attention / manager.threshold);
+                int[] vertices = VerticesFromTriangle(triangle);
+                foreach (int v in vertices)
                 {
-                    attention--;
+                    mesh.colors[v] = triangleColor;
                 }
             }
-            attentionPerTriangle[triangle] = attention;
-            manager.colorGradient.Evaluate(attention / manager.threshold);
         }
     } 
+
+    int[] VerticesFromTriangle(int triangle)
+    {
+        return new int[]{
+            triangles[triangle * 3 + 0],
+            triangles[triangle * 3 + 1],
+            triangles[triangle * 3 + 2]};
+    }
 }

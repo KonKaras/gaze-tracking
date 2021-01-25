@@ -31,6 +31,8 @@ public class EyeTracking : MonoBehaviour
     public Color most;
 
     List<GameObject> spawnedPoints;
+    MeshManager meshManager;
+    Dictionary<MeshColoring, Dictionary<int, List<GameObject>>> triangleToTrackedPointsMappingPerMesh;
 
     Shader shader;
     MLInput.Controller controller;
@@ -45,6 +47,9 @@ public class EyeTracking : MonoBehaviour
         spawnedPoints = new List<GameObject>();
         particleSystem = GetComponent<ParticleSystem>();
         dataPoints = new DataPoints();
+        meshManager = GameObject.Find("Reconstruction").GetComponent<MeshManager>();
+        triangleToTrackedPointsMappingPerMesh = new Dictionary<MeshColoring, Dictionary<int, List<GameObject>>>();
+
 
         MLInput.Start();
         MLInput.OnControllerButtonDown += OnButtonDown;
@@ -155,16 +160,19 @@ public class EyeTracking : MonoBehaviour
         foreach (TrackedPoint point in points) 
         {
             Vector3 normal = Vector3.zero;
-            MeshCorrected(point, ref normal);
             GameObject obj = Instantiate(pointIndicator, point.pos, Quaternion.identity);
+
+            MeshCorrected(point, ref normal, obj);
+            meshManager.Setup(triangleToTrackedPointsMappingPerMesh);
+            meshManager.InitMeshes();
+
             //obj.GetComponent<TrackedPoint>().time = point.time;
-            Debug.Log(normal);
             obj.transform.rotation = Quaternion.FromToRotation(obj.transform.forward, normal);
             obj.transform.Translate(obj.transform.forward.normalized * 1 / 10);
 
             Color color = ComputeColor(ComputeWeight(points, point));
             SpriteRenderer renderer = obj.GetComponent<SpriteRenderer>();
-            GameObject.Find("Reconstruction").GetComponent<MeshManager>().InitMeshes();
+            
             float alpha = renderer.color.a;
             renderer.color = new Color(color.r, color.g, color.b, renderer.color.a);
             //Material newMat = renderer.material;
@@ -243,7 +251,7 @@ public class EyeTracking : MonoBehaviour
         return weight;
     }
 
-    void MeshCorrected(TrackedPoint point, ref Vector3 normal)
+    void MeshCorrected(TrackedPoint point, ref Vector3 normal, GameObject spawnedPoint)
     {
         //get view direction
         Vector3 dir = point.pos - point.camPos;
@@ -251,8 +259,38 @@ public class EyeTracking : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(cam.transform.position, dir, out hit, Mathf.Infinity))
         {
-            point.pos = hit.point;
-            normal = hit.normal;
+            string objName = hit.transform.gameObject.name;
+            int triangle = hit.triangleIndex;
+            MeshColoring mcoloring = hit.transform.GetComponent<MeshColoring>();
+            if (mcoloring != null)
+            {
+                if (triangleToTrackedPointsMappingPerMesh.ContainsKey(hit.transform.GetComponent<MeshColoring>()))
+                {
+                    if (triangleToTrackedPointsMappingPerMesh[mcoloring].ContainsKey(triangle))
+                    {
+                        //add point to hit triangle of mesh
+                        triangleToTrackedPointsMappingPerMesh[mcoloring][triangle].Add(spawnedPoint);
+                    }
+                    else
+                    {
+                        //add triangle to mesh and add point
+                        List<GameObject> trackedPoints = new List<GameObject>();
+                        trackedPoints.Add(spawnedPoint);
+                        triangleToTrackedPointsMappingPerMesh[mcoloring].Add(triangle, trackedPoints);
+                    }
+                }
+                else
+                {
+                    //add new mesh to dict and first triangle entry
+                    List<GameObject> trackedPoints = new List<GameObject>();
+                    trackedPoints.Add(spawnedPoint);
+                    Dictionary<int, List<GameObject>> newTriangleDict = new Dictionary<int, List<GameObject>>();
+                    newTriangleDict.Add(triangle, trackedPoints);
+                    triangleToTrackedPointsMappingPerMesh.Add(mcoloring, newTriangleDict);
+                }
+                spawnedPoint.transform.position = hit.point;
+                normal = hit.normal;
+            }
         }
         else
         {
