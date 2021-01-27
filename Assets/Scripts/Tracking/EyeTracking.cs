@@ -30,6 +30,8 @@ public class EyeTracking : MonoBehaviour
     public Color middleUpper;
     public Color most;
 
+    private GameObject MLSpatialMapper;
+
     List<GameObject> spawnedPoints;
     MeshManager meshManager;
     Dictionary<MeshColoring, Dictionary<int, List<GameObject>>> triangleToTrackedPointsMappingPerMesh;
@@ -38,6 +40,7 @@ public class EyeTracking : MonoBehaviour
     MLInput.Controller controller;
 
     UI ui;
+
 
     // Start is called before the first frame update
     void Start()
@@ -73,6 +76,10 @@ public class EyeTracking : MonoBehaviour
             }
             else
             {
+                //Stop spatial Mapper, otherwise mesh will constantly be reconstructed and our Meshcoloring will be lost
+                MLSpatialMapper = GameObject.Find("/MLSpatialMapper");
+                MLSpatialMapper.gameObject.SetActive(false);
+
                 StopCoroutine("WriteData");
                 MLEyes.Stop();
                 SaveAsJson();
