@@ -6,7 +6,7 @@ public class MeshManager : MonoBehaviour
 {
     public Gradient colorGradient;
     public float threshold;
-    int maxAttention = 0;
+    int maxAttention = 1;
 
     Dictionary<MeshColoring, Dictionary<int, List<GameObject>>> triangleToTrackedPointsMappingPerMesh;
 
@@ -63,5 +63,10 @@ public class MeshManager : MonoBehaviour
     public int GetMaxAttention()
     {
         return maxAttention;
+    }
+
+    public void SetMaxAttention(int attention)
+    {
+        maxAttention = attention;
     }
 }

@@ -46,6 +46,8 @@ public class MeshColoring : MonoBehaviour
         {
             int ver = 0;
             Color[] colors = new Color[mesh.colors.Length];
+            //Set maximum attention back to 1
+            manager.SetMaxAttention(1);
             foreach (int triangle in associatedPointsPerTriangle.Keys)
             {
                 int attention = 0;
@@ -62,12 +64,23 @@ public class MeshColoring : MonoBehaviour
                     }
                 }
                 attentionPerTriangle[triangle] = attention;
+                //Update Maximum Attention
+                if (manager.GetMaxAttention() < attention)
+                {
+                    manager.SetMaxAttention(attention);
+                }
+               
+
                 Color triangleColor = manager.colorGradient.Evaluate(attention / (float)manager.GetMaxAttention());
                 int[] vertices = VerticesFromTriangle(triangle);
                 foreach (int v in vertices)
                 {
+                    try { 
                     colors[v] = triangleColor;
                     ver = v;
+                    }catch (System.Exception e) {
+
+                    }
                 }
             }
             mesh.colors = colors;
