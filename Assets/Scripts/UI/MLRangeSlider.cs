@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR.MagicLeap;
+using System;
 
 public class MLRangeSlider : MonoBehaviour
 {
@@ -30,7 +31,7 @@ public class MLRangeSlider : MonoBehaviour
         Handle = selectedHandle.maxHandle;
 
         MLInput.OnControllerTouchpadGestureEnd += MLInput_OnControllerTouchpadGestureEnd;
-        
+       
     }
 
    
@@ -39,10 +40,11 @@ public class MLRangeSlider : MonoBehaviour
     //this function does not work i do not know why
     private void MLInput_OnControllerTouchpadGestureEnd(byte controllerId, MLInput.Controller.TouchpadGesture touchpadGesture)
     {
-
-       if (touchpadGesture.Type ==MLInput.Controller.TouchpadGesture.GestureType.ForceTapUp)
+       
+        if (touchpadGesture.Type ==MLInput.Controller.TouchpadGesture.GestureType.Swipe &&touchpadGesture.Direction ==  MLInput.Controller.TouchpadGesture.GestureDirection.Up)
         {
-            Debug.Log("Touch Tap recognized");
+
+            Debug.Log("Swipe UP recognized");
             Debug.Log(touchpadGesture.Type.ToString()) ;
             //toggle Handle
             if (Handle == selectedHandle.minHandle)
@@ -85,14 +87,14 @@ public class MLRangeSlider : MonoBehaviour
    //just for debugging
     void updateGestureText()
     {
-        string gestureType = _controller.CurrentTouchpadGesture.Type.ToString();
-        string gestureState = _controller.TouchpadGestureState.ToString();
-        string gestureDirection = _controller.CurrentTouchpadGesture.Direction.ToString();
+     //   string gestureType = _controller.CurrentTouchpadGesture.Type.ToString();
+     //   string gestureState = _controller.TouchpadGestureState.ToString();
+     //   string gestureDirection = _controller.CurrentTouchpadGesture.Direction.ToString();
 
 
      //   Debug.Log("Type: " + gestureType);
-      //  Debug.Log("State: " + gestureState);
-      //  Debug.Log("Direction: " + gestureDirection);
+     //   Debug.Log("State: " + gestureState);
+     //   Debug.Log("Direction: " + gestureDirection);
 
     }
 
@@ -111,26 +113,50 @@ public class MLRangeSlider : MonoBehaviour
 
     void updateSlider()
     {
-        var inputType = _controller.CurrentTouchpadGesture.Type;
+        var currentGesture = _controller.CurrentTouchpadGesture;
+        var inputType =currentGesture.Type;
+        var direction = currentGesture.Direction;
         float inputAngle = 0;
         if (inputType == MLInput.Controller.TouchpadGesture.GestureType.RadialScroll)
         {
-          //  Debug.Log("RadialScroll detected");
-            inputAngle = _controller.CurrentTouchpadGesture.Angle;
-
-            float value = inputAngle/(float)3.6;
-
-            if (Handle.Equals(selectedHandle.minHandle))
+            inputAngle = currentGesture.Angle;
+            float value = inputAngle / (float)(2 * Math.PI); //2*PI*R = Radiant
+                                   
+            Debug.Log("Angle: " + inputAngle);
+            //clockwise scroll == increasing
+            if (direction == MLInput.Controller.TouchpadGesture.GestureDirection.Clockwise)
             {
-                minSliderObj.value = value;
-            //    Debug.Log("Changed minSLider value to: " + value);
+
+                if (Handle.Equals(selectedHandle.minHandle)&& minSliderObj.value<value)
+                {
+                    minSliderObj.value = value;
+                    //    Debug.Log("Changed minSLider value to: " + value);
+                }
+
+                if (Handle == selectedHandle.maxHandle &&maxSliderObj.value<value)
+                {
+                    maxSliderObj.value = value;
+                    //    Debug.Log("Changed maxSLider value to: " + value);
+                }
             }
 
-            if (Handle == selectedHandle.maxHandle)
+            //counter clockwise scroll == decreasing
+            if (direction == MLInput.Controller.TouchpadGesture.GestureDirection.CounterClockwise)
             {
-                maxSliderObj.value = value;
-            //    Debug.Log("Changed maxSLider value to: " + value);
+
+                if (Handle.Equals(selectedHandle.minHandle) && minSliderObj.value > value)
+                {
+                    minSliderObj.value = value;
+                    //    Debug.Log("Changed minSLider value to: " + value);
+                }
+
+                if (Handle == selectedHandle.maxHandle && maxSliderObj.value > value)
+                {
+                    maxSliderObj.value = value;
+                    //    Debug.Log("Changed maxSLider value to: " + value);
+                }
             }
+
         }
 
        
@@ -139,28 +165,6 @@ public class MLRangeSlider : MonoBehaviour
       
     }
 
-    void updateSelectedSlider()
-    {
-         var inputType = _controller.CurrentTouchpadGesture.Type;
-     
-        if (inputType == MLInput.Controller.TouchpadGesture.GestureType.ForceTapUp)
-        {
-            Debug.Log("Touch Tap recognized");
-            //toggle Handle
-            if (Handle == selectedHandle.minHandle)
-            {
-                Handle = selectedHandle.maxHandle;
-                ui_text.text = "max Handle selected";
-            }
-            else
-            {
-                Handle = selectedHandle.minHandle;
-                ui_text.text = "min Handle selected";
-            }
-
-            Debug.Log("Toggled Handle");
-        }
-
-    }
+    
 
 }
