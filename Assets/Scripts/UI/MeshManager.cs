@@ -5,7 +5,6 @@ using UnityEngine;
 public class MeshManager : MonoBehaviour
 {
     public Gradient colorGradient;
-    public float threshold;
     int maxAttention = 1;
 
     Dictionary<MeshColoring, Dictionary<int, List<GameObject>>> triangleToTrackedPointsMappingPerMesh;

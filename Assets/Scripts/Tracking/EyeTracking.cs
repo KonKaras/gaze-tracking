@@ -77,7 +77,7 @@ public class EyeTracking : MonoBehaviour
             else
             {
                 //Stop spatial Mapper, otherwise mesh will constantly be reconstructed and our Meshcoloring will be lost
-                MLSpatialMapper = GameObject.Find("/MLSpatialMapper");
+                MLSpatialMapper = GameObject.Find("MLSpatialMapper");
                 MLSpatialMapper.gameObject.SetActive(false);
 
                 StopCoroutine("WriteData");
@@ -105,6 +105,10 @@ public class EyeTracking : MonoBehaviour
         //for debugging, delete later
         if (Input.GetKeyDown(KeyCode.A))
         {
+            //Stop spatial Mapper, otherwise mesh will constantly be reconstructed and our Meshcoloring will be lost
+            MLSpatialMapper = GameObject.Find("MLSpatialMapper");
+            MLSpatialMapper.gameObject.SetActive(false);
+
             ShowPoints(LoadFromJson());
         }
 

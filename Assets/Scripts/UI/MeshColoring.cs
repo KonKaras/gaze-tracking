@@ -75,8 +75,8 @@ public class MeshColoring : MonoBehaviour
                 int[] vertices = VerticesFromTriangle(triangle);
                 foreach (int v in vertices)
                 {
-                    try { 
-                    colors[v] = triangleColor;
+                    try {
+                        colors[v] = triangleColor;//attention != 0 ? triangleColor : new Color(0,0,0,0);
                     ver = v;
                     }catch (System.Exception e) {
 
