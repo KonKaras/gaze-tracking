@@ -176,8 +176,8 @@ MonoBehaviour:
     key5: {r: 0, g: 0, b: 0, a: 0}
     key6: {r: 0, g: 0, b: 0, a: 0}
     key7: {r: 0, g: 0, b: 0, a: 0}
-    ctime0: 1735
-    ctime1: 5397
+    ctime0: 2891
+    ctime1: 6168
     ctime2: 17733
     ctime3: 47417
     ctime4: 65535
@@ -185,7 +185,7 @@ MonoBehaviour:
     ctime6: 0
     ctime7: 0
     atime0: 0
-    atime1: 1349
+    atime1: 2891
     atime2: 65535
     atime3: 0
     atime4: 0
@@ -195,7 +195,6 @@ MonoBehaviour:
     m_Mode: 0
     m_NumColorKeys: 5
     m_NumAlphaKeys: 3
-  threshold: 2
 --- !u!1 &107572474
 GameObject:
   m_ObjectHideFlags: 0

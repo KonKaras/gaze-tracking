@@ -50,7 +50,7 @@ public class MeshManager : MonoBehaviour
     }
     public void UpdateMeshes()
     {
-        int attention = 0;
+        maxAttention = 0;
         foreach (MeshColoring key in triangleToTrackedPointsMappingPerMesh.Keys)
         {
             key.UpdateColor();
