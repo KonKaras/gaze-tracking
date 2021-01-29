@@ -174,8 +174,6 @@ public class EyeTracking : MonoBehaviour
             GameObject obj = Instantiate(pointIndicator, point.pos, Quaternion.identity);
 
             MeshCorrected(point, ref normal, obj);
-            meshManager.Setup(triangleToTrackedPointsMappingPerMesh);
-            meshManager.InitMeshes();
 
             //obj.GetComponent<TrackedPoint>().time = point.time;
             obj.transform.rotation = Quaternion.FromToRotation(obj.transform.forward, normal);
@@ -194,6 +192,9 @@ public class EyeTracking : MonoBehaviour
             Debug.Log(obj);
             ui.points.Add(obj);
         }
+
+        meshManager.Setup(triangleToTrackedPointsMappingPerMesh);
+        meshManager.InitMeshes();
 
         ui.maxTime = points[points.Count - 1].time;
         ui.pointsData = points;
