@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 //assing to reconstruction mesh prefab!
 public class MeshColoring : MonoBehaviour
@@ -46,10 +47,10 @@ public class MeshColoring : MonoBehaviour
         {
             int ver = 0;
             Color[] colors = new Color[mesh.colors.Length];
-
+            int attention = 0;
             foreach (int triangle in associatedPointsPerTriangle.Keys)
             {
-                int attention = 0;
+                attention = 0;
                 List<GameObject> trackedPoints = associatedPointsPerTriangle[triangle];
                 foreach (GameObject obj in trackedPoints)
                 {
@@ -65,11 +66,14 @@ public class MeshColoring : MonoBehaviour
                 {
                     manager.SetMaxAttention(attention);
                 }
-
-                float gradientEval = Mathf.InverseLerp(0f, (float)manager.GetMaxAttention(), attention);
+            }
+            //assigne colors sorted
+            foreach (KeyValuePair<int, int> triangle in attentionPerTriangle.OrderBy(key => key.Value).ToDictionary(t => t.Key, t => t.Value))
+            {
+                float gradientEval = Mathf.InverseLerp(0f, (float)manager.GetMaxAttention(), triangle.Value);
                 Debug.Log(gradientEval);
                 Color triangleColor = manager.colorGradient.Evaluate(gradientEval);// / (float)manager.GetMaxAttention());
-                int[] vertices = VerticesFromTriangle(triangle);
+                int[] vertices = VerticesFromTriangle(triangle.Key);
 
                 foreach (int v in vertices)
                 {
@@ -92,4 +96,5 @@ public class MeshColoring : MonoBehaviour
             triangles[triangle * 3 + 1],
             triangles[triangle * 3 + 2]};
     }
+
 }
