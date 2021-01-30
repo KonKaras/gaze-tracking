@@ -4,8 +4,12 @@ using UnityEngine;
 
 public class MeshManager : MonoBehaviour
 {
-    public Gradient colorGradient;
-    int maxAttention = 1;
+    public Gradient colorGradientLowerSpectrum;
+    public Gradient colorGradientUpperSpectrum;
+    int maxAttention = 0;
+    float avgAttention = 0;
+    int totalAttention = 0;
+    public int numTriangles = 0;
 
     Dictionary<MeshColoring, Dictionary<int, List<GameObject>>> triangleToTrackedPointsMappingPerMesh;
 
@@ -45,17 +49,25 @@ public class MeshManager : MonoBehaviour
             {
                 attention = triangleToTrackedPointsMappingPerMesh[key][triangle].Count;
                 if (attention > maxAttention) maxAttention = attention;
+                numTriangles++;
             }
         }
     }
     public void UpdateMeshes()
     {
         maxAttention = 0;
+        totalAttention = 0;
         foreach (MeshColoring key in triangleToTrackedPointsMappingPerMesh.Keys)
         {
-            key.UpdateColor();
-
+            key.UpdateAttention();
+            totalAttention += key.meshAttention;
             //Debug.Log(triangleToTrackedPointsMappingPerMesh[key].Count);
+        }
+        avgAttention = totalAttention / (float)numTriangles;
+        Debug.Log("avg: " + avgAttention);
+        foreach(MeshColoring key in triangleToTrackedPointsMappingPerMesh.Keys)
+        {
+            key.UpdateColor(maxAttention, avgAttention);
         }
     }
 

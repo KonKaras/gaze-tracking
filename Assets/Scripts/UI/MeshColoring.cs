@@ -14,8 +14,9 @@ public class MeshColoring : MonoBehaviour
 
     Mesh mesh;
     bool isInitialized = false;
-    Dictionary<int, int> attentionPerTriangle;
+    public Dictionary<int, int> attentionPerTriangle;
     public Dictionary<int, List<GameObject>> associatedPointsPerTriangle;
+    public int meshAttention = 0;
 
 
     // Start is called before the first frame update
@@ -41,10 +42,11 @@ public class MeshColoring : MonoBehaviour
         isInitialized = true;
     }
 
-    public void UpdateColor()
+    public void UpdateAttention()
     {
         if (isInitialized)
         {
+            meshAttention = 0;
             int ver = 0;
             Color[] colors = new Color[mesh.colors.Length];
             int attention = 0;
@@ -60,6 +62,7 @@ public class MeshColoring : MonoBehaviour
                     }
                 }
                 attentionPerTriangle[triangle] = attention;
+                meshAttention += attention;
 
                 //Update Maximum Attention
                 if (manager.GetMaxAttention() < attention)
@@ -67,29 +70,55 @@ public class MeshColoring : MonoBehaviour
                     manager.SetMaxAttention(attention);
                 }
             }
-            //assigne colors sorted
-            foreach (KeyValuePair<int, int> triangle in attentionPerTriangle.OrderBy(key => key.Value).ToDictionary(t => t.Key, t => t.Value))
+        }
+    }
+
+    //assigne colors sorted
+    public void UpdateColor(int maxAttention, float avgAttention)
+    {
+        if (isInitialized)
+        {
+            //foreach (KeyValuePair<int, int> triangle in attentionPerTriangle.OrderBy(key => key.Value).ToDictionary(t => t.Key, t => t.Value))
+            foreach (int triangle in attentionPerTriangle.Keys)
             {
-                float gradientEval = Mathf.InverseLerp(0f, (float)manager.GetMaxAttention(), triangle.Value);
-                Debug.Log(gradientEval);
-                Color triangleColor = manager.colorGradient.Evaluate(gradientEval);// / (float)manager.GetMaxAttention());
-                int[] vertices = VerticesFromTriangle(triangle.Key);
-
-                foreach (int v in vertices)
                 {
-                    try {
-                        colors[v] = triangleColor;
-                    ver = v;
-                    }catch (System.Exception e) {
 
+                    float start = 0;
+                    float end = avgAttention;
+                    float value = attentionPerTriangle[triangle];
+                    Gradient colorGradient = manager.colorGradientLowerSpectrum;
+                    if (value > avgAttention)
+                    {
+                        start = avgAttention;
+                        end = maxAttention;
+                        colorGradient = manager.colorGradientUpperSpectrum;
+                    }
+
+                    float gradientEval = Mathf.InverseLerp(start, end, value);
+
+                    //Debug.Log(gradientEval);
+                    Color triangleColor = colorGradient.Evaluate(gradientEval);// / (float)manager.GetMaxAttention());
+                    int[] vertices = VerticesFromTriangle(triangle);
+
+                    foreach (int v in vertices)
+                    {
+                        try
+                        {
+                            Debug.Log(triangleColor);
+                            colors[v] = triangleColor;
+                        }
+                        catch (System.Exception e)
+                        {
+
+                        }
                     }
                 }
+                mesh.colors = colors;
             }
-            mesh.colors = colors;
         }
-    } 
+    }
 
-    int[] VerticesFromTriangle(int triangle)
+int[] VerticesFromTriangle(int triangle)
     {
         return new int[]{
             triangles[triangle * 3 + 0],
