@@ -88,6 +88,7 @@ public class MeshColoring : MonoBehaviour
                 }
                 attentionPerTriangle[triangle] = attention;
                 meshAttention += attention;
+                manager.SetAttentionToTriangleList(triangle, attention);
 
                 //Update Maximum Attention
                 if (manager.GetMaxAttention() < attention)
