@@ -168,19 +168,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   colorGradientLowerSpectrum:
     serializedVersion: 2
-    key0: {r: 0.16316223, g: 0, b: 1, a: 0}
-    key1: {r: 0, g: 0.75245667, b: 1, a: 1}
-    key2: {r: 0, g: 0.6509434, b: 0.2893049, a: 1}
-    key3: {r: 0.05724919, g: 1, b: 0, a: 0}
-    key4: {r: 0, g: 0, b: 0, a: 0}
+    key0: {r: 0.08235288, g: 0, b: 0.5, a: 0}
+    key1: {r: 0.027350426, g: 0, b: 1, a: 1}
+    key2: {r: 0, g: 0.75245667, b: 1, a: 1}
+    key3: {r: 0, g: 0.6509434, b: 0.2893049, a: 0}
+    key4: {r: 0.05724919, g: 1, b: 0, a: 0}
     key5: {r: 0, g: 0, b: 0, a: 0}
     key6: {r: 0, g: 0, b: 0, a: 0}
     key7: {r: 0, g: 0, b: 0, a: 0}
     ctime0: 1542
-    ctime1: 16577
-    ctime2: 37779
-    ctime3: 65535
-    ctime4: 0
+    ctime1: 6361
+    ctime2: 16577
+    ctime3: 37779
+    ctime4: 65535
     ctime5: 0
     ctime6: 0
     ctime7: 0
@@ -193,7 +193,7 @@ MonoBehaviour:
     atime6: 0
     atime7: 0
     m_Mode: 0
-    m_NumColorKeys: 4
+    m_NumColorKeys: 5
     m_NumAlphaKeys: 3
   colorGradientUpperSpectrum:
     serializedVersion: 2
@@ -467,7 +467,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 6e-45, y: -0.0000011646481, z: 1.11e-43, w: 0.19921875}
   m_UseBoundingSphereOverride: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
