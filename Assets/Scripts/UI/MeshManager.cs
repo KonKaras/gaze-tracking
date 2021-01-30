@@ -11,7 +11,6 @@ public class MeshManager : MonoBehaviour
     public Gradient colorGradientUpperSpectrum;
     int maxAttention = 0;
     float avgAttention = 0;
-    int median = 0;
     int totalAttention = 0;
     int numTriangles = 0;
 
@@ -29,6 +28,14 @@ public class MeshManager : MonoBehaviour
         else
         {
             attentionPerTriangles.Add(triangle, attention);
+        }
+    }
+
+    public void RemoveAttentionFromTriangle(int triangle)
+    {
+        if (attentionPerTriangles.ContainsKey(triangle))
+        {
+            attentionPerTriangles.Remove(triangle);
         }
     }
 
@@ -50,10 +57,10 @@ public class MeshManager : MonoBehaviour
         attentionPerTriangles = new Dictionary<int, int>();
     }
 
-    void UpdateMedian()
+    int UpdateMedian()
     {
         int[] workingArray = attentionPerTriangles.Values.ToArray<int>();
-        median = GetMedian(workingArray, workingArray.Length);
+        return GetMedian(workingArray, workingArray.Length);
     }
 
     //https://www.geeksforgeeks.org/median-of-an-unsorted-array-in-liner-time-on/
@@ -174,8 +181,8 @@ public class MeshManager : MonoBehaviour
         }
         //Debug.Log("triangles " + numTriangles);
         //Debug.Log("totalAttention " + totalAttention);
-        avgAttention = useMedian ? median : totalAttention / (float)numTriangles;
-        //Debug.Log("avg: " + avgAttention);
+        avgAttention = useMedian ? UpdateMedian() : totalAttention / (float)numTriangles;
+        Debug.Log("avg: " + avgAttention);
         foreach(MeshColoring key in triangleToTrackedPointsMappingPerMesh.Keys)
         {
             key.UpdateColor(maxAttention, avgAttention);

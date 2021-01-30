@@ -88,8 +88,8 @@ public class MeshColoring : MonoBehaviour
                 }
                 attentionPerTriangle[triangle] = attention;
                 meshAttention += attention;
-                manager.SetAttentionToTriangleList(triangle, attention);
-
+                if (attention != 0) manager.SetAttentionToTriangleList(triangle, attention);
+                else manager.RemoveAttentionFromTriangle(triangle);
                 //Update Maximum Attention
                 if (manager.GetMaxAttention() < attention)
                 {
@@ -112,9 +112,10 @@ public class MeshColoring : MonoBehaviour
                 float end = avgAttention;
                 float value = triangle.Value;
                 Gradient colorGradient = manager.colorGradientLowerSpectrum;
-
+                
                 if (value > avgAttention)
                 {
+                    //Debug.Log(value);
                     start = avgAttention;
                     end = maxAttention;
                     colorGradient = manager.colorGradientUpperSpectrum;
