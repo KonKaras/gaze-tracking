@@ -189,7 +189,7 @@ public class EyeTracking : MonoBehaviour
             //newMat.color = new Color(color.r, color.g, color.b, alpha);
 
             //renderer.material = newMat;
-            Debug.Log(obj);
+            //Debug.Log(obj);
             ui.points.Add(obj);
         }
 
