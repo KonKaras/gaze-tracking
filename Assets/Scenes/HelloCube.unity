@@ -168,6 +168,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   avgOverlappingVertices: 1
   useMedian: 1
+  threshold: 10
   colorGradientLowerSpectrum:
     serializedVersion: 2
     key0: {r: 0.08235288, g: 0, b: 0.5, a: 0}
@@ -1209,6 +1210,7 @@ MonoBehaviour:
   maxTime: 0
   slider: {fileID: 1951809903}
   currentTime: {fileID: 1780889325}
+  meshManager: {fileID: 91249837}
 --- !u!4 &1525405793 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5322227173276918813, guid: 37b203b46b9e3ff46997727819f9ee4d,
@@ -2078,18 +2080,6 @@ MonoBehaviour:
         m_TargetAssemblyTypeName: UI, Assembly-CSharp
         m_MethodName: HandleTime
         m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 91249837}
-        m_TargetAssemblyTypeName: MeshManager, Assembly-CSharp
-        m_MethodName: UpdateMeshes
-        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine

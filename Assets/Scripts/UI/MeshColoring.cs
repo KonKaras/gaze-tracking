@@ -37,10 +37,12 @@ public class MeshColoring : MonoBehaviour
 
         attentionPerTriangle = new Dictionary<int, int>();
         associatedPointsPerTriangle = dict;
+        
         foreach (int triangle in associatedPointsPerTriangle.Keys)
         {
-            attentionPerTriangle.Add(triangle, 0);
+            attentionPerTriangle.Add(triangle, -1);
         }
+        
 
         samePosVertices = new Dictionary<int, List<int>>();
         gradientValuePerVertex = new Dictionary<int, float>();
@@ -87,9 +89,12 @@ public class MeshColoring : MonoBehaviour
                     }
                 }
                 attentionPerTriangle[triangle] = attention;
-                meshAttention += attention;
-                if (attention != 0) manager.SetAttentionToTriangleList(triangle, attention);
-                else manager.RemoveAttentionFromTriangle(triangle);
+                if (attention > manager.threshold)
+                {
+                    manager.SetAttentionToTriangleList(this, triangle, attention);
+                    meshAttention += attention;
+                }
+                else manager.RemoveAttentionFromTriangle(this, triangle);
                 //Update Maximum Attention
                 if (manager.GetMaxAttention() < attention)
                 {
@@ -108,14 +113,14 @@ public class MeshColoring : MonoBehaviour
             foreach (KeyValuePair<int, int> triangle in attentionPerTriangle.OrderBy(key => key.Value).ToDictionary(t => t.Key, t => t.Value))
             //foreach (int triangle in attentionPerTriangle.Keys)
             {
-                float start = 0;
+                float start = manager.threshold > avgAttention ? 0 : manager.threshold;
                 float end = avgAttention;
                 float value = triangle.Value;
                 Gradient colorGradient = manager.colorGradientLowerSpectrum;
                 
                 if (value > avgAttention)
                 {
-                    //Debug.Log(value);
+                    //Debug.Log("Upper: " +value);
                     start = avgAttention;
                     end = maxAttention;
                     colorGradient = manager.colorGradientUpperSpectrum;
@@ -123,6 +128,7 @@ public class MeshColoring : MonoBehaviour
 
                 float gradientEval = Mathf.InverseLerp(start, end, value);
                 int[] triangleVertices = VerticesFromTriangle(triangle.Key);
+               
                 Color triangleColor = colorGradient.Evaluate(gradientEval);
                 foreach (int v in triangleVertices)
                 {

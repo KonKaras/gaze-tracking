@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System.Runtime;
 
 public class MeshManager : MonoBehaviour
 {
     public bool avgOverlappingVertices = true;
     public bool useMedian = true;
+    //Omit attention under this value
+    public int threshold = 0;
     public Gradient colorGradientLowerSpectrum;
     public Gradient colorGradientUpperSpectrum;
     int maxAttention = 0;
@@ -17,70 +20,96 @@ public class MeshManager : MonoBehaviour
     int a, b;
 
     Dictionary<MeshColoring, Dictionary<int, List<GameObject>>> triangleToTrackedPointsMappingPerMesh;
-    Dictionary<int, int> attentionPerTriangles;
+    Dictionary<MeshColoring, Dictionary<int, int>> attentionPerTriangles;
 
-    public void SetAttentionToTriangleList(int triangle, int attention)
+    public void SetAttentionToTriangleList(MeshColoring mesh, int triangle, int attention)
     {
-        if (attentionPerTriangles.ContainsKey(triangle))
+        if (attentionPerTriangles.ContainsKey(mesh))
         {
-            attentionPerTriangles[triangle] = attention;
+            if (attentionPerTriangles[mesh].ContainsKey(triangle)) attentionPerTriangles[mesh][triangle] = attention;
+            else attentionPerTriangles[mesh].Add(triangle, attention);
         }
         else
         {
-            attentionPerTriangles.Add(triangle, attention);
+            Dictionary<int, int> tmp = new Dictionary<int, int>();
+            tmp.Add(triangle, attention);
+            attentionPerTriangles.Add(mesh, tmp);
         }
     }
 
-    public void RemoveAttentionFromTriangle(int triangle)
+    public void RemoveAttentionFromTriangle(MeshColoring mesh, int triangle)
     {
-        if (attentionPerTriangles.ContainsKey(triangle))
+        if (attentionPerTriangles.ContainsKey(mesh))
         {
-            attentionPerTriangles.Remove(triangle);
+            if (attentionPerTriangles[mesh].ContainsKey(triangle))
+            {
+                //Debug.Log(mesh + " " + triangle + " " + attentionPerTriangles[mesh][triangle]);
+                attentionPerTriangles[mesh].Remove(triangle);
+                if (attentionPerTriangles[mesh].Keys.Count == 0)
+                {
+                    attentionPerTriangles.Remove(mesh);
+                }
+            }
         }
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     public void Setup(Dictionary<MeshColoring, Dictionary<int, List<GameObject>>> dict)
     {
         triangleToTrackedPointsMappingPerMesh = dict;
-        attentionPerTriangles = new Dictionary<int, int>();
+        attentionPerTriangles = new Dictionary<MeshColoring, Dictionary<int, int>>();
     }
 
-    int UpdateMedian()
+    float UpdateMedian()
     {
-        int[] workingArray = attentionPerTriangles.Values.ToArray<int>();
-        return GetMedian(workingArray, workingArray.Length);
+        List<int> attentionValues = new List<int>();
+        foreach (MeshColoring mesh in attentionPerTriangles.Keys)
+        {
+            //attentionValues.AddRange(attentionPerTriangles[mesh].Values);
+            foreach (int i in attentionPerTriangles[mesh].Keys)
+            {
+                attentionValues.Add(attentionPerTriangles[mesh][i]);
+            }
+        }
+
+        attentionValues.Sort();
+
+        if (attentionValues.Count != 0)
+        {
+            return attentionValues.Count % 2 == 0 ? 0.5f * (attentionValues[attentionValues.Count / 2] + attentionValues[attentionValues.Count / 2 + 1]) : attentionValues[(attentionValues.Count + 1) / 2];
+        }
+
+        return 0;
+
+        //return GetMedian(workingArray, workingArray.Length); ---> way more efficient but stack overflow, needs fixing
     }
 
     //https://www.geeksforgeeks.org/median-of-an-unsorted-array-in-liner-time-on/
     int GetMedian(int[] workingArray, int n)
     {
-        int result;
         a = -1;
         b = -1;
 
         if (n % 2 == 1)
         {
-            MedianHelper(workingArray, 0, n - 1, n / 2);
-            result = b;
+            MedianHelper(workingArray, 0, n - 1, (int)n / 2);
+            return b;
         }
         else
         {
-            MedianHelper(workingArray, 0, n - 1, n / 2);
-            result = (a + b) / 2;
+            MedianHelper(workingArray, 0, n - 1, (int)n / 2);
+            return (a + b) / 2;
         }
-        return result;
     }
 
     int[] swapValues(int[] workingArray, int idx1, int idx2)
@@ -96,9 +125,9 @@ public class MeshManager : MonoBehaviour
         int pivotIndex = 1;
         int runningIndex = 1;
         int rightValue = workingArray[right];
-        while(runningIndex < right)
+        while (runningIndex < right)
         {
-            if(workingArray[runningIndex] < rightValue)
+            if (workingArray[runningIndex] < rightValue)
             {
                 workingArray = swapValues(workingArray, pivotIndex, runningIndex);
                 pivotIndex++;
@@ -112,31 +141,32 @@ public class MeshManager : MonoBehaviour
     int randomPartition(int[] workingArray, int left, int right)
     {
         int n = right - left + 1;
-        int pivot = workingArray[Random.Range(0, workingArray.Length-1)] % n;
+        int pivot = new System.Random().Next() % n;//workingArray[Random.Range(0, workingArray.Length-1)] % n;
         workingArray = swapValues(workingArray, left + pivot, right);
         return GetIndexOfPivot(workingArray, left, right);
     }
 
     int MedianHelper(int[] workingArray, int left, int right, int x)
     {
-        if(left <= right)
+        if (left <= right)
         {
             //get pivot index
             int pivotIndex = randomPartition(workingArray, left, right);
             //median found for odd number of values
-            if(pivotIndex == x)
+            if (pivotIndex == x)
             {
                 b = workingArray[pivotIndex];
                 if (a != -1) return int.MinValue;
-            }else if (pivotIndex == x - 1)
+            }
+            else if (pivotIndex == x - 1)
             {
                 //a&b is middle of array
                 a = workingArray[pivotIndex];
-                if (a != -1) return int.MinValue;
+                if (b != -1) return int.MinValue;
             }
 
             // x <= pivot -> search left
-            if(x <= pivotIndex)
+            if (x <= pivotIndex)
             {
                 return MedianHelper(workingArray, left, pivotIndex - 1, x);
             }
@@ -150,8 +180,8 @@ public class MeshManager : MonoBehaviour
 
     public void InitMeshes()
     {
-        
-        foreach(MeshColoring child in transform.GetComponentsInChildren<MeshColoring>())
+
+        foreach (MeshColoring child in transform.GetComponentsInChildren<MeshColoring>())
         {
             child.GetComponent<MeshFilter>().mesh.colors = new Color[child.GetComponent<MeshFilter>().mesh.vertices.Length];
         }
@@ -169,6 +199,17 @@ public class MeshManager : MonoBehaviour
             }
         }
     }
+
+    int GetActiveTriangleCount()
+    {
+        int num = 0;
+        foreach(MeshColoring mesh in attentionPerTriangles.Keys)
+        {
+            num += attentionPerTriangles[mesh].Keys.Count;
+        }
+        return num != 0 ? num : 1;
+    }
+
     public void UpdateMeshes()
     {
         maxAttention = 0;
@@ -181,9 +222,9 @@ public class MeshManager : MonoBehaviour
         }
         //Debug.Log("triangles " + numTriangles);
         //Debug.Log("totalAttention " + totalAttention);
-        avgAttention = useMedian ? UpdateMedian() : totalAttention / (float)numTriangles;
-        Debug.Log("avg: " + avgAttention);
-        foreach(MeshColoring key in triangleToTrackedPointsMappingPerMesh.Keys)
+        avgAttention = useMedian ? UpdateMedian() : totalAttention / (float)GetActiveTriangleCount();
+        //Debug.Log("avg: " + avgAttention);
+        foreach (MeshColoring key in triangleToTrackedPointsMappingPerMesh.Keys)
         {
             key.UpdateColor(maxAttention, avgAttention);
         }

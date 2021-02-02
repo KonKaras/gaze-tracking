@@ -12,6 +12,7 @@ public class UI : MonoBehaviour
     public float maxTime;
     public Slider slider;
     public TextMeshProUGUI currentTime;
+    public MeshManager meshManager;
 
     // Start is called before the first frame update
     void Start()
@@ -42,10 +43,10 @@ public class UI : MonoBehaviour
         //slider.value = Mathf.Clamp(slider.value, 0f, 1f);
         float selectedTime = value * maxTime;
         currentTime.text = "Time: " + System.Math.Round(selectedTime, 2) + "s";
-        
+
         for (int i = 0; i < pointsData.Count; i++)
         {
-            if(pointsData[i].time <= selectedTime)
+            if (pointsData[i].time <= selectedTime)
             {
                 points[i].SetActive(true);
             }
@@ -53,7 +54,7 @@ public class UI : MonoBehaviour
             {
                 points[i].SetActive(false);
             }
-        
         }
+        meshManager.UpdateMeshes();
     }
 }
