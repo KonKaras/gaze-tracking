@@ -16,6 +16,7 @@ public class MeshManager : MonoBehaviour
     float avgAttention = 0;
     int totalAttention = 0;
     int numTriangles = 0;
+    public float samePositionTolerance = 0.0001f;
 
     int a, b;
 

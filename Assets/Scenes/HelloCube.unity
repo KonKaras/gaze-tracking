@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028334, g: 0.2257134, b: 0.30692226, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -168,10 +168,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   avgOverlappingVertices: 1
   useMedian: 1
-  threshold: 10
+  threshold: 0
   colorGradientLowerSpectrum:
     serializedVersion: 2
-    key0: {r: 0.08235288, g: 0, b: 0.5, a: 0}
+    key0: {r: 0.08235288, g: 0, b: 0.5, a: 1}
     key1: {r: 0.027350426, g: 0, b: 1, a: 1}
     key2: {r: 0, g: 0.75245667, b: 1, a: 1}
     key3: {r: 0, g: 0.6509434, b: 0.2893049, a: 0}
@@ -227,6 +227,7 @@ MonoBehaviour:
     m_Mode: 0
     m_NumColorKeys: 6
     m_NumAlphaKeys: 2
+  samePositionTolerance: 0.0000001
 --- !u!1 &107572474
 GameObject:
   m_ObjectHideFlags: 0

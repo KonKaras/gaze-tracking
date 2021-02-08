@@ -53,7 +53,7 @@ public class MeshColoring : MonoBehaviour
             for (int j = 0; j < vertices.Length; j++)
             {
                 if (i == j) continue;
-                if ((vertices[i] - vertices[j]).magnitude <= 0.0001)
+                if ((vertices[i] - vertices[j]).magnitude <= manager.samePositionTolerance)
                 {
                     sameVertices.Add(j);
                 }
@@ -159,9 +159,10 @@ public class MeshColoring : MonoBehaviour
                     foreach (int v in triangleVertices)
                     {
                         float value = gradientValuePerVertex[v];
-                        int num = 1;
+                        int num = 0;
                         if (samePosVertices.ContainsKey(v))
                         {
+                            Debug.Log("same Pos vertices contains key, value/key"+value+" "+v);
                             foreach (int sameV in samePosVertices[v])
                             {
                                 if (gradientValuePerVertex.ContainsKey(sameV))
@@ -171,12 +172,16 @@ public class MeshColoring : MonoBehaviour
                                 }
                             }
                         }
+                        float scaledAvgAttentionToGradientRange = Mathf.InverseLerp(manager.threshold, manager.GetMaxAttention(),avgAttention);
+                        float avgValue = value / ((num == 0) ? 1 : num);
+
                         Gradient colorGradient = manager.colorGradientLowerSpectrum;
-                        if (value > avgAttention)
+                        if (avgValue >scaledAvgAttentionToGradientRange)
                         {
                             colorGradient = manager.colorGradientUpperSpectrum;
                         }
-                        colors[v] = colorGradient.Evaluate(value / num);
+
+                        colors[v] = colorGradient.Evaluate(avgValue);
                     }
                 }
             }
