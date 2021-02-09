@@ -17,7 +17,7 @@ public class MeshColoring : MonoBehaviour
     public Dictionary<int, int> attentionPerTriangle;
     public Dictionary<int, List<GameObject>> associatedPointsPerTriangle;
     Dictionary<int, List<int>> samePosVertices;
-    Dictionary<int, float> gradientValuePerVertex;
+    Dictionary<int, float> attentionPerVertex;
     public int meshAttention = 0;
 
 
@@ -45,7 +45,7 @@ public class MeshColoring : MonoBehaviour
         
 
         samePosVertices = new Dictionary<int, List<int>>();
-        gradientValuePerVertex = new Dictionary<int, float>();
+        attentionPerVertex = new Dictionary<int, float>();
 
         for (int i = 0; i < vertices.Length; i++)
         {
@@ -134,13 +134,13 @@ public class MeshColoring : MonoBehaviour
                 {
                     if (manager.avgOverlappingVertices)
                     {
-                        if (!gradientValuePerVertex.ContainsKey(v))
+                        if (!attentionPerVertex.ContainsKey(v))
                         {
-                            gradientValuePerVertex.Add(v, gradientEval);
+                            attentionPerVertex.Add(v, value);
                         }
                         else
                         {
-                            gradientValuePerVertex[v] = gradientEval;
+                            attentionPerVertex[v] = value;
                         }
                     }
                     else
@@ -158,29 +158,37 @@ public class MeshColoring : MonoBehaviour
 
                     foreach (int v in triangleVertices)
                     {
-                        float value = gradientValuePerVertex[v];
+                        float value = attentionPerVertex[v];
                         int num = 0;
                         if (samePosVertices.ContainsKey(v))
                         {
                             Debug.Log("same Pos vertices contains key, value/key"+value+" "+v);
                             foreach (int sameV in samePosVertices[v])
                             {
-                                if (gradientValuePerVertex.ContainsKey(sameV))
+                                if (attentionPerVertex.ContainsKey(sameV))
                                 {
-                                    value += gradientValuePerVertex[sameV];
+                                    value += attentionPerVertex[sameV];
                                     num++;
                                 }
                             }
                         }
-                        float scaledAvgAttentionToGradientRange = Mathf.InverseLerp(manager.threshold, manager.GetMaxAttention(),avgAttention);
+                        //float scaledAvgAttentionToGradientRange = Mathf.InverseLerp(manager.threshold, manager.GetMaxAttention(),avgAttention);
                         float avgValue = value / ((num == 0) ? 1 : num);
 
                         Gradient colorGradient = manager.colorGradientLowerSpectrum;
-                        if (avgValue >scaledAvgAttentionToGradientRange)
+
+                        float start = manager.threshold > avgAttention ? 0 : manager.threshold;
+                        float end = avgAttention;
+
+                        if (avgValue > avgAttention)//scaledAvgAttentionToGradientRange)
                         {
+                            //Debug.Log("Upper: " +value);
+                            start = avgAttention;
+                            end = maxAttention;
                             colorGradient = manager.colorGradientUpperSpectrum;
                         }
 
+                        avgValue = Mathf.InverseLerp(start, end, avgValue);
                         colors[v] = colorGradient.Evaluate(avgValue);
                     }
                 }

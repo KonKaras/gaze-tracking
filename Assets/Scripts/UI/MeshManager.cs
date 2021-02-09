@@ -69,6 +69,13 @@ public class MeshManager : MonoBehaviour
     {
         triangleToTrackedPointsMappingPerMesh = dict;
         attentionPerTriangles = new Dictionary<MeshColoring, Dictionary<int, int>>();
+        //SwitchShader();
+    }
+
+    void SwitchShader(MeshColoring meshColoring)
+    {
+        Shader vertexShader = Shader.Find("Shader Graphs/MeshShader");
+        meshColoring.gameObject.GetComponent<MeshRenderer>().material.shader = vertexShader;
     }
 
     float UpdateMedian()
@@ -185,6 +192,7 @@ public class MeshManager : MonoBehaviour
         foreach (MeshColoring child in transform.GetComponentsInChildren<MeshColoring>())
         {
             child.GetComponent<MeshFilter>().mesh.colors = new Color[child.GetComponent<MeshFilter>().mesh.vertices.Length];
+            SwitchShader(child);
         }
 
         int attention = 0;
