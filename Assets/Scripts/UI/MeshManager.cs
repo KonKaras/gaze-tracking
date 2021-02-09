@@ -18,10 +18,14 @@ public class MeshManager : MonoBehaviour
     int numTriangles = 0;
     public float samePositionTolerance = 0.0001f;
 
+
     int a, b;
 
     Dictionary<MeshColoring, Dictionary<int, List<GameObject>>> triangleToTrackedPointsMappingPerMesh;
     Dictionary<MeshColoring, Dictionary<int, int>> attentionPerTriangles;
+
+   public Dictionary<MeshColoring, Dictionary<int, Container>> attentionPerVertices;
+    public Dictionary<int, Vector3> allVertexPos;
 
     public void SetAttentionToTriangleList(MeshColoring mesh, int triangle, int attention)
     {
@@ -69,6 +73,10 @@ public class MeshManager : MonoBehaviour
     {
         triangleToTrackedPointsMappingPerMesh = dict;
         attentionPerTriangles = new Dictionary<MeshColoring, Dictionary<int, int>>();
+      //  allVertexPos = new List<Vector3>();
+        attentionPerVertices = new Dictionary<MeshColoring, Dictionary<int, Container>>();
+
+
         //SwitchShader();
     }
 
@@ -200,11 +208,17 @@ public class MeshManager : MonoBehaviour
         {
             key.Initialize(triangleToTrackedPointsMappingPerMesh[key]);
             //Debug.Log(triangleToTrackedPointsMappingPerMesh[key].Count);
+
+
             foreach (int triangle in triangleToTrackedPointsMappingPerMesh[key].Keys)
             {
                 attention = triangleToTrackedPointsMappingPerMesh[key][triangle].Count;
                 if (attention > maxAttention) maxAttention = attention;
                 numTriangles++;
+                //allVertexPos.AddRange(key.getAllPositionsFromTriangle(triangle));
+
+
+
             }
         }
     }
@@ -212,7 +226,7 @@ public class MeshManager : MonoBehaviour
     int GetActiveTriangleCount()
     {
         int num = 0;
-        foreach(MeshColoring mesh in attentionPerTriangles.Keys)
+        foreach (MeshColoring mesh in attentionPerTriangles.Keys)
         {
             num += attentionPerTriangles[mesh].Keys.Count;
         }
@@ -233,9 +247,14 @@ public class MeshManager : MonoBehaviour
         //Debug.Log("totalAttention " + totalAttention);
         avgAttention = useMedian ? UpdateMedian() : totalAttention / (float)GetActiveTriangleCount();
         //Debug.Log("avg: " + avgAttention);
+
+
         foreach (MeshColoring key in triangleToTrackedPointsMappingPerMesh.Keys)
         {
+            
+
             key.UpdateColor(maxAttention, avgAttention);
+
         }
     }
 
@@ -249,3 +268,4 @@ public class MeshManager : MonoBehaviour
         maxAttention = attention;
     }
 }
+
