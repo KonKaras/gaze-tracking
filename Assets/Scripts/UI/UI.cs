@@ -79,9 +79,11 @@ public class UI : MonoBehaviour
             if (pointsData[i].time <= maxTimeValue && pointsData[i].time >= minTimeValue)
             {
                 points[i].SetActive(true);
+                points[i].GetComponent<SpriteRenderer>().enabled = showPoints;
             }
             else
             {
+                points[i].GetComponent<SpriteRenderer>().enabled = showPoints;
                 points[i].SetActive(false);
             }
 
