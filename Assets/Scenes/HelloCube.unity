@@ -172,7 +172,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   avgOverlappingVertices: 1
   useMedian: 1
-  threshold: 0
+  threshold: 1
   colorGradientLowerSpectrum:
     serializedVersion: 2
     key0: {r: 0.08235288, g: 0, b: 0.5, a: 0}
@@ -1384,6 +1384,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c3b7858cbc35b0418d350f306f4985c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showPoints: 0
   text: {fileID: 1720518247}
   points: []
   pointsData: []

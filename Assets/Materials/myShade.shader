@@ -5,7 +5,15 @@
     }
     SubShader
     {
-      Tags {"RenderType" = "Opaque"}
+      Blend SrcAlpha OneMinusSrcAlpha
+
+      Tags {"RenderType" = "Transparent"}
+
+    BindChannels
+    {
+        Bind "Color", Color  
+        Bind "vertex", vertex
+    }
       CGPROGRAM
       #pragma surface surf Lambert vertex:vert 
 

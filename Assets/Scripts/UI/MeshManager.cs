@@ -6,6 +6,7 @@ using System.Runtime;
 
 public class MeshManager : MonoBehaviour
 {
+    public bool useUniformMesh = true;
     public bool avgOverlappingVertices = true;
     public bool useMedian = true;
     //Omit attention under this value
@@ -72,6 +73,19 @@ public class MeshManager : MonoBehaviour
     public void Setup(Dictionary<MeshColoring, Dictionary<int, List<GameObject>>> dict)
     {
         triangleToTrackedPointsMappingPerMesh = dict;
+        /*
+        foreach(MeshColoring mcol in triangleToTrackedPointsMappingPerMesh.Keys)
+        {
+            int[] triangles = mcol.transform.GetComponent<MeshFilter>().mesh.triangles;
+            foreach(int triangle in triangles)
+            {
+                if (!triangleToTrackedPointsMappingPerMesh[mcol].ContainsKey(triangle))
+                {
+                    triangleToTrackedPointsMappingPerMesh[mcol].Add(triangle, new List<GameObject>());
+                }
+            }
+        }
+        */
         attentionPerTriangles = new Dictionary<MeshColoring, Dictionary<int, int>>();
       //  allVertexPos = new List<Vector3>();
         vertexInfo = new Dictionary<MeshColoring, Dictionary<int, Container>>();
@@ -88,24 +102,35 @@ public class MeshManager : MonoBehaviour
 
     float UpdateMedian()
     {
-        List<int> attentionValues = new List<int>();
-        foreach (MeshColoring mesh in attentionPerTriangles.Keys)
+        List<float> attentionValues = new List<float>();
+        if (avgOverlappingVertices)
         {
-            //attentionValues.AddRange(attentionPerTriangles[mesh].Values);
-            foreach (int i in attentionPerTriangles[mesh].Keys)
+            foreach (MeshColoring mesh in attentionPerTriangles.Keys)
             {
-                attentionValues.Add(attentionPerTriangles[mesh][i]);
+                //attentionValues.AddRange(attentionPerTriangles[mesh].Values);
+                foreach (int i in attentionPerTriangles[mesh].Keys)
+                {
+                    attentionValues.Add(attentionPerTriangles[mesh][i]);
+                }
             }
         }
-
-        attentionValues.Sort();
-
-        if (attentionValues.Count != 0)
+        else
         {
-            return attentionValues.Count % 2 == 0 ? 0.5f * (attentionValues[attentionValues.Count / 2] + attentionValues[attentionValues.Count / 2 + 1]) : attentionValues[(attentionValues.Count + 1) / 2];
+            foreach(MeshColoring mesh in vertexInfo.Keys)
+            {
+                foreach(int vertex in vertexInfo[mesh].Keys)
+                {
+                    attentionValues.Add(vertexInfo[mesh][vertex].attention);
+                }
+            }
         }
-
-        return 0;
+        if (attentionValues.Count == 0) return 0;
+        attentionValues.Sort();
+        //if (attentionValues.Count != 0)
+        //{
+        int mid = attentionValues.Count / 2;
+        return attentionValues.Count % 2 == 0 ? 0.5f * (attentionValues[mid] + attentionValues[mid + 1]) : attentionValues[mid + 1];
+        //return 0;
 
         //return GetMedian(workingArray, workingArray.Length); ---> way more efficient but stack overflow, needs fixing
     }
@@ -196,8 +221,10 @@ public class MeshManager : MonoBehaviour
 
     public void InitMeshes()
     {
-
-        foreach (MeshColoring child in transform.GetComponentsInChildren<MeshColoring>())
+        MeshColoring[] uniform = new MeshColoring[1];
+        uniform[0] = GetComponent<MeshColoring>();
+        MeshColoring[] toInit = useUniformMesh ? uniform : transform.GetComponentsInChildren<MeshColoring>();
+        foreach (MeshColoring child in uniform)
         {
             child.GetComponent<MeshFilter>().mesh.colors = new Color[child.GetComponent<MeshFilter>().mesh.vertices.Length];
             SwitchShader(child);

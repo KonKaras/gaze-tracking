@@ -53,7 +53,15 @@ public class MeshColoring : MonoBehaviour
 
     public void Initialize(Dictionary<int, List<GameObject>> dict)
     {
-        manager = transform.parent.GetComponent<MeshManager>();
+        if (GetComponent<MeshManager>() != null)
+        {
+            manager = GetComponent<MeshManager>();
+        }
+        else
+        {
+            manager = transform.parent.GetComponent<MeshManager>();
+        }
+
         mesh = GetComponent<MeshFilter>().mesh;
 
         vertices = mesh.vertices;
