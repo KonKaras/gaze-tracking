@@ -136,6 +136,7 @@ GameObject:
   - component: {fileID: 91249840}
   - component: {fileID: 91249839}
   - component: {fileID: 91249838}
+  - component: {fileID: 91249841}
   m_Layer: 0
   m_Name: Reconstruction
   m_TagString: Untagged
@@ -294,6 +295,19 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+--- !u!114 &91249841
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 91249835}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9acf62b5e508e14f8a7140f53e0a791, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  meshAttention: 0
 --- !u!1 &107572474
 GameObject:
   m_ObjectHideFlags: 0

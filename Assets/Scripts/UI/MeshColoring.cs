@@ -81,7 +81,7 @@ public class MeshColoring : MonoBehaviour
                     {
                         if (!manager.vertexInfo[this].ContainsKey(i))
                         {
-                            Container info = new Container(this, 0, vertices[i], null);
+                            Container info = new Container(this, 0, vertices[i], new List<Container>());
                             manager.vertexInfo[this].Add(i, info);
                         }
                     }
@@ -213,7 +213,6 @@ public class MeshColoring : MonoBehaviour
                     {
                         float value = manager.vertexInfo[this][v].attention;//attentionPerVertex[v];
                         int num = 0;
-                        Debug.Log("# same Pos vertices " + manager.vertexInfo[this][v].sameVerticesInfo.Count);
                         foreach (Container sameV in manager.vertexInfo[this][v].sameVerticesInfo)
                         {
                                 if (sameV.active)

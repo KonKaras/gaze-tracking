@@ -331,6 +331,8 @@ public class MeshManager : MonoBehaviour
         {
             transform.GetChild(i).gameObject.SetActive(false);
         }
+
+        GetComponent<MeshCollider>().sharedMesh = result;
     }
 }
 
