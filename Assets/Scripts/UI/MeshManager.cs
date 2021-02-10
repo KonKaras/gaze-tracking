@@ -6,6 +6,7 @@ using System.Runtime;
 
 public class MeshManager : MonoBehaviour
 {
+    public bool useUniformMesh = true;
     public bool avgOverlappingVertices = true;
     public bool useMedian = true;
     //Omit attention under this value
@@ -220,8 +221,10 @@ public class MeshManager : MonoBehaviour
 
     public void InitMeshes()
     {
-
-        foreach (MeshColoring child in transform.GetComponentsInChildren<MeshColoring>())
+        MeshColoring[] uniform = new MeshColoring[1];
+        uniform[0] = GetComponent<MeshColoring>();
+        MeshColoring[] toInit = useUniformMesh ? uniform : transform.GetComponentsInChildren<MeshColoring>();
+        foreach (MeshColoring child in uniform)
         {
             child.GetComponent<MeshFilter>().mesh.colors = new Color[child.GetComponent<MeshFilter>().mesh.vertices.Length];
             SwitchShader(child);

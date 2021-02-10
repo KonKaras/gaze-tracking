@@ -172,7 +172,7 @@ public class EyeTracking : MonoBehaviour
             Vector3 normal = Vector3.zero;
             GameObject obj = Instantiate(pointIndicator, point.pos, Quaternion.identity);
 
-            //meshManager.UnifyMeshes();
+            if(meshManager.useUniformMesh) meshManager.UnifyMeshes();
 
             MeshCorrected(point, ref normal, obj);
 
