@@ -16,7 +16,7 @@ public class MeshColoring : MonoBehaviour
     bool isInitialized = false;
     public Dictionary<int, int> attentionPerTriangle;
     public Dictionary<int, List<GameObject>> associatedPointsPerTriangle;
-    Dictionary<int, List<int>> samePosVertices;
+    //Dictionary<int, List<Container>> samePosVertices;
     //Dictionary<int, float> attentionPerVertex;
     public int meshAttention = 0;
 
@@ -25,6 +25,31 @@ public class MeshColoring : MonoBehaviour
     void Start()
     {
     }
+
+   /*
+    public void InitSameVertices()
+    {
+        //for (int i = 0; i < vertices.Length; i++)
+        foreach (int triangle in attentionPerTriangle.Keys)
+        {
+            foreach (int vertex in VerticesFromTriangle(triangle))
+            {
+                List<Container> sameVerticesInfo = new List<Container>();
+                foreach (MeshColoring meshcoloring in manager.vertexInfo.Keys)
+                {
+                    foreach (int j in manager.vertexInfo[meshcoloring].Keys)
+                    {
+                        if (meshcoloring == this && vertex == j) continue;
+                        if ((vertices[vertex] - manager.vertexInfo[meshcoloring][j].position).magnitude <= manager.samePositionTolerance)
+                        {
+                            sameVerticesInfo.Add(manager.vertexInfo[meshcoloring][j]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+   */
 
     public void Initialize(Dictionary<int, List<GameObject>> dict)
     {
@@ -41,40 +66,41 @@ public class MeshColoring : MonoBehaviour
         foreach (int triangle in associatedPointsPerTriangle.Keys)
         {
             attentionPerTriangle.Add(triangle, -1);
-        }
-        
-
-        samePosVertices = new Dictionary<int, List<int>>();
-       // attentionPerVertex = new Dictionary<int, float>();
-
-        for (int i = 0; i < vertices.Length; i++)
-        {
-            List<int> sameVertices = new List<int>();
-            foreach (MeshColoring meshcoloring in manager.attentionPerVertices.Keys)
+            if (manager.avgOverlappingVertices)
             {
-
-
-                foreach (int j in manager.attentionPerVertices[meshcoloring].Keys)
+                foreach (int i in VerticesFromTriangle(triangle))
                 {
-                  //  if (i == j) continue;
-                    if ((vertices[i] - manager.attentionPerVertices[meshcoloring][j].position).magnitude <= manager.samePositionTolerance)
+                    if (!manager.vertexInfo.ContainsKey(this))
                     {
-                        sameVertices.Add(j);
+                        Container info = new Container(this, 0, vertices[i], new List<Container>());
+                        Dictionary<int, Container> sameVertexInfo = new Dictionary<int, Container>();
+                        sameVertexInfo.Add(i, info);
+                        manager.vertexInfo.Add(this, sameVertexInfo);
+                    }
+                    else
+                    {
+                        if (!manager.vertexInfo[this].ContainsKey(i))
+                        {
+                            Container info = new Container(this, 0, vertices[i], null);
+                            manager.vertexInfo[this].Add(i, info);
+                        }
                     }
                 }
-                if (samePosVertices.ContainsKey(i))
-                {
-                    samePosVertices[i] = sameVertices;
-                }
-                else
-                {
-                    samePosVertices.Add(i, sameVertices);
-                }
-                //Debug.Log(samePosVertices[i].Count);
             }
         }
+
+        
         isInitialized = true;
     }
+
+    void EnableSameVertices(int triangle, bool active)
+    {
+        foreach (int vertex in VerticesFromTriangle(triangle))
+        {
+            manager.vertexInfo[this][vertex].active = active;
+        }
+    }
+
 
     public void UpdateAttention()
     {
@@ -91,6 +117,10 @@ public class MeshColoring : MonoBehaviour
                     if (obj.activeSelf)
                     {
                         attention++;
+                    }
+                    if (manager.avgOverlappingVertices)
+                    {
+                        EnableSameVertices(triangle, obj.activeSelf);
                     }
                 }
                 attentionPerTriangle[triangle] = attention;
@@ -139,27 +169,31 @@ public class MeshColoring : MonoBehaviour
                 {
                     if (manager.avgOverlappingVertices)
                     {
-                        if (!manager.attentionPerVertices.ContainsKey(this))
+                        manager.vertexInfo[this][v].attention = value;
+                    
+                        /*
+                        if (!manager.vertexInfo.ContainsKey(this))
                         {
                             //  attentionPerVertex.Add(v, value);
                             Dictionary<int, Container> infoOfVertex = new Dictionary<int, Container>();
-                            infoOfVertex.Add( v, new Container(value, vertices[v]) );
-                            manager.attentionPerVertices.Add(this, infoOfVertex);
+                            infoOfVertex.Add( v, new Container(this, value, vertices[v]));
+                            manager.vertexInfo.Add(this, infoOfVertex);
                         }
                         else
                         {
-                            if (manager.attentionPerVertices[this].ContainsKey(v))
+                            if (manager.vertexInfo[this].ContainsKey(v))
                             {
-                                manager.attentionPerVertices[this][v].position = vertices[v];
-                                manager.attentionPerVertices[this][v].attention = value;
+                                manager.vertexInfo[this][v].position = vertices[v];
+                                manager.vertexInfo[this][v].attention = value;
+                                manager.vertexInfo[this][v].meshColoring = this;
                             }
                             else
                             {
                                 
-                                manager.attentionPerVertices[this].Add(v, new Container(value,vertices[v]));
+                                manager.vertexInfo[this].Add(v, new Container(this,value,vertices[v]));
                             }
-                        //    attentionPerVertex[v] = value;
                         }
+                        */
                     }
                     else
                     {
@@ -177,19 +211,17 @@ public class MeshColoring : MonoBehaviour
 
                     foreach (int v in triangleVertices)
                     {
-                        float value = manager.attentionPerVertices[this][v].attention;//attentionPerVertex[v];
+                        float value = manager.vertexInfo[this][v].attention;//attentionPerVertex[v];
                         int num = 0;
-                        if (samePosVertices.ContainsKey(v))
+                        Debug.Log("# same Pos vertices " + manager.vertexInfo[this][v].sameVerticesInfo.Count);
+                        foreach (Container sameV in manager.vertexInfo[this][v].sameVerticesInfo)
                         {
-                            Debug.Log("same Pos vertices contains key, value/key"+value+" "+v);
-                            foreach (int sameV in samePosVertices[v])
-                            {
-                                if (ContainsKey(sameV))
+                                if (sameV.active)
                                 {
-                                    value += attentionPerVertex[sameV];
+                                    Debug.Log("same Pos vertices contains key, value/key" + value + " " + v);
+                                    value += sameV.attention;
                                     num++;
                                 }
-                            }
                         }
                         //float scaledAvgAttentionToGradientRange = Mathf.InverseLerp(manager.threshold, manager.GetMaxAttention(),avgAttention);
                         float avgValue = value / ((num == 0) ? 1 : num);

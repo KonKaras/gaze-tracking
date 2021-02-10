@@ -24,7 +24,7 @@ public class MeshManager : MonoBehaviour
     Dictionary<MeshColoring, Dictionary<int, List<GameObject>>> triangleToTrackedPointsMappingPerMesh;
     Dictionary<MeshColoring, Dictionary<int, int>> attentionPerTriangles;
 
-   public Dictionary<MeshColoring, Dictionary<int, Container>> attentionPerVertices;
+    public Dictionary<MeshColoring, Dictionary<int, Container>> vertexInfo;
     public Dictionary<int, Vector3> allVertexPos;
 
     public void SetAttentionToTriangleList(MeshColoring mesh, int triangle, int attention)
@@ -74,7 +74,7 @@ public class MeshManager : MonoBehaviour
         triangleToTrackedPointsMappingPerMesh = dict;
         attentionPerTriangles = new Dictionary<MeshColoring, Dictionary<int, int>>();
       //  allVertexPos = new List<Vector3>();
-        attentionPerVertices = new Dictionary<MeshColoring, Dictionary<int, Container>>();
+        vertexInfo = new Dictionary<MeshColoring, Dictionary<int, Container>>();
 
 
         //SwitchShader();
@@ -204,24 +204,50 @@ public class MeshManager : MonoBehaviour
         }
 
         int attention = 0;
-        foreach (MeshColoring key in triangleToTrackedPointsMappingPerMesh.Keys)
+        foreach (MeshColoring m_col_a in triangleToTrackedPointsMappingPerMesh.Keys)
         {
-            key.Initialize(triangleToTrackedPointsMappingPerMesh[key]);
+            m_col_a.Initialize(triangleToTrackedPointsMappingPerMesh[m_col_a]);
             //Debug.Log(triangleToTrackedPointsMappingPerMesh[key].Count);
 
 
-            foreach (int triangle in triangleToTrackedPointsMappingPerMesh[key].Keys)
+            foreach (int triangle in triangleToTrackedPointsMappingPerMesh[m_col_a].Keys)
             {
-                attention = triangleToTrackedPointsMappingPerMesh[key][triangle].Count;
+                attention = triangleToTrackedPointsMappingPerMesh[m_col_a][triangle].Count;
                 if (attention > maxAttention) maxAttention = attention;
                 numTriangles++;
                 //allVertexPos.AddRange(key.getAllPositionsFromTriangle(triangle));
+            }
+        }
+        if (avgOverlappingVertices)
+        {
+            InitSameVertices();
+        }
+    }
 
-
-
+    
+    void InitSameVertices()
+    {
+        foreach (MeshColoring m_col_a in vertexInfo.Keys)
+        {
+            foreach (int vertex_a in vertexInfo[m_col_a].Keys)
+            {
+                Vector3 pos = vertexInfo[m_col_a][vertex_a].position;
+                foreach (MeshColoring m_col_b in vertexInfo.Keys)
+                {
+                    foreach (int vertex_b in vertexInfo[m_col_b].Keys)
+                    {
+                        if (m_col_a == m_col_b && vertex_a == vertex_b) continue;
+                        Vector3 compare = vertexInfo[m_col_b][vertex_b].position;
+                        if ((pos - compare).magnitude < samePositionTolerance)
+                        {
+                            vertexInfo[m_col_a][vertex_a].sameVerticesInfo.Add(vertexInfo[m_col_b][vertex_b]);
+                        }
+                    }
+                }
             }
         }
     }
+    
 
     int GetActiveTriangleCount()
     {
@@ -266,6 +292,45 @@ public class MeshManager : MonoBehaviour
     public void SetMaxAttention(int attention)
     {
         maxAttention = attention;
+    }
+
+    public void UnifyMeshes()
+    {
+        Quaternion originalRot = transform.rotation;
+        Vector3 originalPos = transform.position;
+
+        transform.position = Vector3.zero;
+        transform.rotation = Quaternion.identity;
+
+        List<Transform> meshTransforms = new List<Transform>();
+
+        List<CombineInstance> combines = new List<CombineInstance>();
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            if (transform.GetChild(i).GetComponent<MeshCollider>() != null)
+            {
+                CombineInstance c = new CombineInstance();
+                c.subMeshIndex = 0;
+                c.mesh = transform.GetChild(i).GetComponent<MeshCollider>().sharedMesh;
+                c.transform = transform.GetChild(i).transform.localToWorldMatrix;
+                combines.Add(c);
+            }
+        }
+
+        Mesh result = new Mesh();
+
+
+        result.CombineMeshes(combines.ToArray());
+
+        GetComponent<MeshFilter>().mesh = result;
+
+        transform.rotation = originalRot;
+        transform.position = originalPos;
+
+        for(int i = 0; i < transform.childCount; i++)
+        {
+            transform.GetChild(i).gameObject.SetActive(false);
+        }
     }
 }
 

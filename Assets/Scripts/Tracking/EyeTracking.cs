@@ -167,11 +167,12 @@ public class EyeTracking : MonoBehaviour
 
     void ShowPoints(List<TrackedPoint> points)
     {
-        //TODO: replace with particle system or computeshader
         foreach (TrackedPoint point in points) 
         {
             Vector3 normal = Vector3.zero;
             GameObject obj = Instantiate(pointIndicator, point.pos, Quaternion.identity);
+
+            meshManager.UnifyMeshes();
 
             MeshCorrected(point, ref normal, obj);
 
