@@ -11,8 +11,8 @@ public class MeshColoring : MonoBehaviour
     int[] triangles;
 
     MeshManager manager;
-
     Mesh mesh;
+
     bool isInitialized = false;
     public Dictionary<int, int> attentionPerTriangle;
     public Dictionary<int, List<GameObject>> associatedPointsPerTriangle;
@@ -58,6 +58,10 @@ public class MeshColoring : MonoBehaviour
 
         vertices = mesh.vertices;
         mesh.colors = new Color[vertices.Length];
+        for(int i = 0; i<mesh.colors.Length; i++)// in mesh.colors)
+        {
+                mesh.vertices[i] = Vector3.one;
+        }
         triangles = mesh.triangles;
 
         attentionPerTriangle = new Dictionary<int, int>();

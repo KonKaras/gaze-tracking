@@ -175,7 +175,7 @@ MonoBehaviour:
   threshold: 0
   colorGradientLowerSpectrum:
     serializedVersion: 2
-    key0: {r: 0.08235288, g: 0, b: 0.5, a: 1}
+    key0: {r: 0.08235288, g: 0, b: 0.5, a: 0}
     key1: {r: 0.027350426, g: 0, b: 1, a: 1}
     key2: {r: 0, g: 0.75245667, b: 1, a: 1}
     key3: {r: 0, g: 0.6509434, b: 0.2893049, a: 0}
