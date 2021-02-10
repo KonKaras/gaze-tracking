@@ -10,9 +10,13 @@ public class UI : MonoBehaviour
     public List<GameObject> points;
     public List<TrackedPoint> pointsData;
     public float maxTime;
-    public Slider slider;
+    public MLRangeSlider slider;
     public TextMeshProUGUI currentTime;
     public MeshManager meshManager;
+
+    private float minSliderValue = 0;
+    private float maxSliderValue = 0;
+
 
     // Start is called before the first frame update
     void Start()
@@ -39,7 +43,9 @@ public class UI : MonoBehaviour
 
     public void HandleTime(float value)
     {
-        slider.value = value;
+        //commented out for compliation when using rangeTimeslider
+
+       // slider.maxSliderObj = value;
         //slider.value = Mathf.Clamp(slider.value, 0f, 1f);
         float selectedTime = value * maxTime;
         currentTime.text = "Time: " + System.Math.Round(selectedTime, 2) + "s";
@@ -57,4 +63,37 @@ public class UI : MonoBehaviour
         }
         meshManager.UpdateMeshes();
     }
+
+    public void HandleTimeRange()
+    {
+        float maxTimeValue = maxSliderValue * maxTime;
+        float minTimeValue = minSliderValue * maxTime;
+        float selectedMaxTime = slider.maxSliderObj.value* maxTime;
+        float selectedMinTime = slider.minSliderObj.value * maxTime;
+        currentTime.text = "Begin: " + System.Math.Round(selectedMinTime, 2) + "s"+ " End: " + System.Math.Round(selectedMaxTime, 2) + "s";
+        for (int i = 0; i < points.Count; i++)
+        {
+            if (pointsData[i].time <= maxTimeValue && pointsData[i].time >= minTimeValue)
+            {
+                points[i].SetActive(true);
+            }
+            else
+            {
+                points[i].SetActive(false);
+            }
+
+        }
+        meshManager.UpdateMeshes();
+    }
+
+    public void setMinSliderValue(float value)
+    {
+        minSliderValue = value;
+    }
+
+    public void setMaxSliderValue(float value)
+    {
+        maxSliderValue = value;
+    }
+
 }
