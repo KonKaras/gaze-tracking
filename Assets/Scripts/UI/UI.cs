@@ -6,6 +6,7 @@ using TMPro;
 
 public class UI : MonoBehaviour
 {
+    public bool showPoints = false;
     public TextMeshProUGUI text;
     public List<GameObject> points;
     public List<TrackedPoint> pointsData;
@@ -49,9 +50,11 @@ public class UI : MonoBehaviour
             if (pointsData[i].time <= selectedTime)
             {
                 points[i].SetActive(true);
+                points[i].GetComponent<SpriteRenderer>().enabled = showPoints;
             }
             else
             {
+                points[i].GetComponent<SpriteRenderer>().enabled = showPoints;
                 points[i].SetActive(false);
             }
         }
