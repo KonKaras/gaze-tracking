@@ -82,7 +82,7 @@ public class MeshManager : MonoBehaviour
 
     void SwitchShader(MeshColoring meshColoring)
     {
-        Shader vertexShader = Shader.Find("Shader Graphs/MeshShader");
+        Shader vertexShader = Shader.Find("Unlit/myShade");
         meshColoring.gameObject.GetComponent<MeshRenderer>().material.shader = vertexShader;
     }
 

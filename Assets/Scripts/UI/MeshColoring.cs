@@ -60,7 +60,7 @@ public class MeshColoring : MonoBehaviour
         mesh.colors = new Color[vertices.Length];
         for(int i = 0; i<mesh.colors.Length; i++)// in mesh.colors)
         {
-                mesh.vertices[i] = Vector3.one;
+                mesh.colors[i] = new Color(0,0,0,0);
         }
         triangles = mesh.triangles;
 
@@ -149,12 +149,12 @@ public class MeshColoring : MonoBehaviour
         if (isInitialized)
         {
             Color[] colors = new Color[mesh.colors.Length];
-            foreach (KeyValuePair<int, int> triangle in attentionPerTriangle.OrderBy(key => key.Value).ToDictionary(t => t.Key, t => t.Value))
-            //foreach (int triangle in attentionPerTriangle.Keys)
+            //foreach (KeyValuePair<int, int> triangle in attentionPerTriangle.OrderBy(key => key.Value).ToDictionary(t => t.Key, t => t.Value))
+            foreach (int triangle in attentionPerTriangle.Keys)
             {
                 float start = manager.threshold > avgAttention ? 0 : manager.threshold;
                 float end = avgAttention;
-                float value = triangle.Value;
+                float value = attentionPerTriangle[triangle];
                 Gradient colorGradient = manager.colorGradientLowerSpectrum;
                 
                 if (value > avgAttention)
@@ -166,7 +166,7 @@ public class MeshColoring : MonoBehaviour
                 }
 
                 float gradientEval = Mathf.InverseLerp(start, end, value);
-                int[] triangleVertices = VerticesFromTriangle(triangle.Key);
+                int[] triangleVertices = VerticesFromTriangle(triangle);
                
                 Color triangleColor = colorGradient.Evaluate(gradientEval);
                 foreach (int v in triangleVertices)
@@ -221,7 +221,7 @@ public class MeshColoring : MonoBehaviour
                         {
                                 if (sameV.active)
                                 {
-                                    Debug.Log("same Pos vertices contains key, value/key" + value + " " + v);
+                                    //Debug.Log("same Pos vertices contains key, value/key" + value + " " + v);
                                     value += sameV.attention;
                                     num++;
                                 }
@@ -247,7 +247,11 @@ public class MeshColoring : MonoBehaviour
                     }
                 }
             }
-            mesh.colors = colors;
+
+            //mesh.colors = colors;
+
+                mesh.colors = colors;
+            
         }
     }
 

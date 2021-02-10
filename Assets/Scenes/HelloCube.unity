@@ -231,7 +231,7 @@ MonoBehaviour:
     m_Mode: 0
     m_NumColorKeys: 6
     m_NumAlphaKeys: 2
-  samePositionTolerance: 0.0000001
+  samePositionTolerance: 0.01
 --- !u!23 &91249838
 MeshRenderer:
   m_ObjectHideFlags: 0
