@@ -232,7 +232,7 @@ MonoBehaviour:
     m_Mode: 0
     m_NumColorKeys: 6
     m_NumAlphaKeys: 2
-  samePositionTolerance: 0.00001
+  samePositionTolerance: 0.001
 --- !u!23 &91249838
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -877,7 +877,7 @@ MonoBehaviour:
   cam: {fileID: 642236833}
   slider: {fileID: 1951809903}
   shouldRecord: 1
-  recordEmpty: 0
+  recordEmpty: 1
   path: Assets/Scripts/Tracking/tracking.txt
   updatesPerSecond: 30
   showLiveGaze: 0

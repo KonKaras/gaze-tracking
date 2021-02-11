@@ -228,22 +228,33 @@ public class MeshColoring : MonoBehaviour
                         int num = 0;
                         foreach (Container sameV in manager.vertexInfo[this][v].sameVerticesInfo)
                         {
-                                if (sameV.active)
+                            if (sameV.active)
+                            {
+                                //Debug.Log("same Pos vertices contains key, value/key" + value + " " + v);
+                                //value += Mathf.Pow(sameV.attention, 2);
+                                if (sameV.attention > manager.threshold)
                                 {
-                                    //Debug.Log("same Pos vertices contains key, value/key" + value + " " + v);
+                                    //value += Mathf.Pow(sameV.attention,2);
                                     value += sameV.attention;
-                                    if(sameV.attention > manager.threshold) num++;
+                                    num++;
                                 }
+                            }
                         }
-                        //float scaledAvgAttentionToGradientRange = Mathf.InverseLerp(manager.threshold, manager.GetMaxAttention(),avgAttention);
+                        //value = Mathf.Sqrt(value);
                         float avgValue = value / ((num == 0) ? 1 : num);
+                        manager.vertexInfo[this][v].attention = avgValue;
+                       
+                    }
+                }
+                foreach(int vertex in manager.vertexInfo[this].Keys)
+                {
 
                         Gradient colorGradient = manager.colorGradientLowerSpectrum;
 
                         float start = manager.threshold > avgAttention ? avgAttention : manager.threshold;
                         float end = avgAttention;
 
-                        if (avgValue > avgAttention)//scaledAvgAttentionToGradientRange)
+                        if (manager.vertexInfo[this][vertex].attention > avgAttention)//scaledAvgAttentionToGradientRange)
                         {
                             //Debug.Log("Upper: " +value);
                             start = avgAttention;
@@ -251,10 +262,9 @@ public class MeshColoring : MonoBehaviour
                             colorGradient = manager.colorGradientUpperSpectrum;
                         }
 
-                        avgValue = Mathf.InverseLerp(start, end, avgValue);
-                        colors[v] = colorGradient.Evaluate(avgValue);
+                        float toGradient = Mathf.InverseLerp(start, end, manager.vertexInfo[this][vertex].attention);
+                        colors[vertex] = colorGradient.Evaluate(toGradient);
                         //if(avgValue == 0) Debug.Log(colors[v]);
-                    }
                 }
             }
 
