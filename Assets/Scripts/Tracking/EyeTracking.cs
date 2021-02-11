@@ -10,6 +10,7 @@ public class EyeTracking : MonoBehaviour
     public Camera cam;
     public UnityEngine.UI.Slider slider;
     public bool shouldRecord;
+    public bool recordEmpty = true;
     bool recording;
     bool startedRecording;
     bool savingDone;
@@ -167,14 +168,37 @@ public class EyeTracking : MonoBehaviour
 
     void ShowPoints(List<TrackedPoint> points)
     {
+        
         foreach (TrackedPoint point in points) 
         {
             Vector3 normal = Vector3.zero;
             GameObject obj = Instantiate(pointIndicator, point.pos, Quaternion.identity);
 
             if(meshManager.useUniformMesh) meshManager.UnifyMeshes();
+            else { 
+                foreach(MeshCollider collider in meshManager.GetComponentsInChildren<MeshCollider>())
+                {
+                    collider.sharedMesh = collider.GetComponent<MeshFilter>().mesh;
+                }
+            }
 
             MeshCorrected(point, ref normal, obj);
+
+            foreach(MeshColoring mcol in triangleToTrackedPointsMappingPerMesh.Keys)
+            {
+                int[] triangles = mcol.GetComponent<MeshFilter>().sharedMesh.triangles;
+                int index = 0;
+                while (index < triangles.Length / 3)
+                {
+                    if (triangleToTrackedPointsMappingPerMesh.ContainsKey(mcol))
+                    {
+                        if (!triangleToTrackedPointsMappingPerMesh[mcol].ContainsKey(index)){
+                            triangleToTrackedPointsMappingPerMesh[mcol].Add(index, new List<GameObject>());
+                        }
+                    }
+                    index++;
+                }
+            }
 
             //obj.GetComponent<TrackedPoint>().time = point.time;
             obj.transform.rotation = Quaternion.FromToRotation(obj.transform.forward, normal);
@@ -301,6 +325,7 @@ public class EyeTracking : MonoBehaviour
                     newTriangleDict.Add(triangle, trackedPoints);
                     triangleToTrackedPointsMappingPerMesh.Add(mcoloring, newTriangleDict);
                 }
+
                 spawnedPoint.transform.position = hit.point;
                 normal = hit.normal;
             }

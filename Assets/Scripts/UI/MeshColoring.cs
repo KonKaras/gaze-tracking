@@ -62,13 +62,13 @@ public class MeshColoring : MonoBehaviour
             manager = transform.parent.GetComponent<MeshManager>();
         }
 
-        mesh = GetComponent<MeshFilter>().mesh;
+        mesh = GetComponent<MeshFilter>().sharedMesh;
 
         vertices = mesh.vertices;
         mesh.colors = new Color[vertices.Length];
         for(int i = 0; i<mesh.colors.Length; i++)// in mesh.colors)
         {
-                mesh.colors[i] = new Color(0,0,0,0);
+                mesh.colors[i] = new Color(0, 0.8f, 1);
         }
         triangles = mesh.triangles;
 
@@ -177,6 +177,7 @@ public class MeshColoring : MonoBehaviour
                 int[] triangleVertices = VerticesFromTriangle(triangle);
                
                 Color triangleColor = colorGradient.Evaluate(gradientEval);
+                
                 foreach (int v in triangleVertices)
                 {
                     if (manager.avgOverlappingVertices)
@@ -231,7 +232,7 @@ public class MeshColoring : MonoBehaviour
                                 {
                                     //Debug.Log("same Pos vertices contains key, value/key" + value + " " + v);
                                     value += sameV.attention;
-                                    num++;
+                                    if(sameV.attention > manager.threshold) num++;
                                 }
                         }
                         //float scaledAvgAttentionToGradientRange = Mathf.InverseLerp(manager.threshold, manager.GetMaxAttention(),avgAttention);
@@ -239,7 +240,7 @@ public class MeshColoring : MonoBehaviour
 
                         Gradient colorGradient = manager.colorGradientLowerSpectrum;
 
-                        float start = manager.threshold > avgAttention ? 0 : manager.threshold;
+                        float start = manager.threshold > avgAttention ? avgAttention : manager.threshold;
                         float end = avgAttention;
 
                         if (avgValue > avgAttention)//scaledAvgAttentionToGradientRange)
@@ -252,19 +253,19 @@ public class MeshColoring : MonoBehaviour
 
                         avgValue = Mathf.InverseLerp(start, end, avgValue);
                         colors[v] = colorGradient.Evaluate(avgValue);
+                        //if(avgValue == 0) Debug.Log(colors[v]);
                     }
                 }
             }
 
-            //mesh.colors = colors;
-
-                mesh.colors = colors;
-            
+            mesh.colors = colors;
         }
     }
 
      public int[] VerticesFromTriangle(int triangle)
     {
+        //Debug.Log("triangle id " + triangle + " of " + triangles.Length);
+        //if (triangle + 2 > triangles.Length-1) return new int[] { 0, 0, 0 };
         return new int[]{
             triangles[triangle * 3 + 0],
             triangles[triangle * 3 + 1],

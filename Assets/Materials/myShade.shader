@@ -9,13 +9,8 @@
 
       Tags {"RenderType" = "Transparent"}
 
-    BindChannels
-    {
-        Bind "Color", Color  
-        Bind "vertex", vertex
-    }
       CGPROGRAM
-      #pragma surface surf Lambert vertex:vert 
+      #pragma surface surf Lambert vertex:vert alpha:fade
 
       struct Input
       {
@@ -31,6 +26,7 @@
       void surf(Input IN, inout SurfaceOutput o)
       {
           o.Albedo = IN.vertColor.rgb;
+          o.Alpha = IN.vertColor.a;
       }
       ENDCG
     }

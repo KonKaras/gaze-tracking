@@ -103,14 +103,14 @@ public class MeshManager : MonoBehaviour
     float UpdateMedian()
     {
         List<float> attentionValues = new List<float>();
-        if (avgOverlappingVertices)
+        if (!avgOverlappingVertices)
         {
             foreach (MeshColoring mesh in attentionPerTriangles.Keys)
             {
                 //attentionValues.AddRange(attentionPerTriangles[mesh].Values);
                 foreach (int i in attentionPerTriangles[mesh].Keys)
                 {
-                    attentionValues.Add(attentionPerTriangles[mesh][i]);
+                    if(attentionPerTriangles[mesh][i] > threshold) attentionValues.Add(attentionPerTriangles[mesh][i]);
                 }
             }
         }
@@ -120,7 +120,7 @@ public class MeshManager : MonoBehaviour
             {
                 foreach(int vertex in vertexInfo[mesh].Keys)
                 {
-                    attentionValues.Add(vertexInfo[mesh][vertex].attention);
+                    if (vertexInfo[mesh][vertex].attention > threshold) attentionValues.Add(vertexInfo[mesh][vertex].attention);
                 }
             }
         }
@@ -224,7 +224,7 @@ public class MeshManager : MonoBehaviour
         MeshColoring[] uniform = new MeshColoring[1];
         uniform[0] = GetComponent<MeshColoring>();
         MeshColoring[] toInit = useUniformMesh ? uniform : transform.GetComponentsInChildren<MeshColoring>();
-        foreach (MeshColoring child in uniform)
+        foreach (MeshColoring child in toInit)
         {
             child.GetComponent<MeshFilter>().mesh.colors = new Color[child.GetComponent<MeshFilter>().mesh.vertices.Length];
             SwitchShader(child);
