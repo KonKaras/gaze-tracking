@@ -157,12 +157,12 @@ public class MeshColoring : MonoBehaviour
         if (isInitialized)
         {
             Color[] colors = new Color[mesh.colors.Length];
-            //foreach (KeyValuePair<int, int> triangle in attentionPerTriangle.OrderBy(key => key.Value).ToDictionary(t => t.Key, t => t.Value))
-            foreach (int triangle in attentionPerTriangle.Keys)
+            foreach (KeyValuePair<int, int> triangle in attentionPerTriangle.OrderBy(key => key.Value).ToDictionary(t => t.Key, t => t.Value))
+            //foreach (int triangle in attentionPerTriangle.Keys)
             {
                 float start = manager.threshold > avgAttention ? 0 : manager.threshold;
                 float end = avgAttention;
-                float value = attentionPerTriangle[triangle];
+                float value = triangle.Value;//attentionPerTriangle[triangle];
                 Gradient colorGradient = manager.colorGradientLowerSpectrum;
                 
                 if (value > avgAttention)
@@ -174,7 +174,7 @@ public class MeshColoring : MonoBehaviour
                 }
 
                 float gradientEval = Mathf.InverseLerp(start, end, value);
-                int[] triangleVertices = VerticesFromTriangle(triangle);
+                int[] triangleVertices = VerticesFromTriangle(triangle.Key);
                
                 Color triangleColor = colorGradient.Evaluate(gradientEval);
                 
