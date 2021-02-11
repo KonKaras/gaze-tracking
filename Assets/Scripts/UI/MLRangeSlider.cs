@@ -26,13 +26,15 @@ public class MLRangeSlider : MonoBehaviour
    
     void Start()
     {
+        this.gameObject.SetActive(false);
         MLInput.Start();
         _controller = MLInput.GetController(MLInput.Hand.Left);
 
         Handle = selectedHandle.maxHandle;
 
         MLInput.OnControllerTouchpadGestureEnd += MLInput_OnControllerTouchpadGestureEnd;
-       
+
+        
     }
 
    

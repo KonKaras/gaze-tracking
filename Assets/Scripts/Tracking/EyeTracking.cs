@@ -8,7 +8,7 @@ using UnityEngine.XR.MagicLeap;
 public class EyeTracking : MonoBehaviour
 {
     public Camera cam;
-    public UnityEngine.UI.Slider slider;
+    public MLRangeSlider slider;
     public bool shouldRecord;
     public bool recordEmpty = true;
     bool recording;
