@@ -222,6 +222,7 @@ public class EyeTracking : MonoBehaviour
         meshManager.InitMeshes();
 
         ui.maxTime = points[points.Count - 1].time;
+        ui.minTime = points[0].time;
         ui.pointsData = points;
 
         slider.gameObject.SetActive(true);

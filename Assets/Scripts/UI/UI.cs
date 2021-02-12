@@ -11,6 +11,7 @@ public class UI : MonoBehaviour
     public List<GameObject> points;
     public List<TrackedPoint> pointsData;
     public float maxTime;
+    public float minTime;
     public MLRangeSlider slider;
     public TextMeshProUGUI currentTime;
     public MeshManager meshManager;
@@ -48,7 +49,7 @@ public class UI : MonoBehaviour
 
        // slider.maxSliderObj = value;
         //slider.value = Mathf.Clamp(slider.value, 0f, 1f);
-        float selectedTime = value * maxTime;
+        float selectedTime = value * (maxTime-minTime);
         currentTime.text = "Time: " + System.Math.Round(selectedTime, 2) + "s";
 
         for (int i = 0; i < pointsData.Count; i++)
@@ -69,10 +70,10 @@ public class UI : MonoBehaviour
 
     public void HandleTimeRange()
     {
-        float maxTimeValue = maxSliderValue * maxTime;
-        float minTimeValue = minSliderValue * maxTime;
-        float selectedMaxTime = slider.maxSliderObj.value* maxTime;
-        float selectedMinTime = slider.minSliderObj.value * maxTime;
+        float maxTimeValue = maxSliderValue * (maxTime-minTime);
+        float minTimeValue = minSliderValue * (maxTime-minTime);
+        float selectedMaxTime = slider.maxSliderObj.value* (maxTime-minTime);
+        float selectedMinTime = slider.minSliderObj.value * (maxTime-minTime);
         currentTime.text = "Begin: " + System.Math.Round(selectedMinTime, 2) + "s"+ " End: " + System.Math.Round(selectedMaxTime, 2) + "s";
         for (int i = 0; i < points.Count; i++)
         {
