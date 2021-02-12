@@ -1177,6 +1177,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cam: {fileID: 642236833}
   slider: {fileID: 1342932295}
+  recordingtext: {fileID: 1720518247}
   shouldRecord: 1
   recordEmpty: 1
   path: Assets/Scripts/Tracking/tracking.txt
@@ -2113,7 +2114,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -48.9}
+  m_AnchoredPosition: {x: 0, y: -17}
   m_SizeDelta: {x: 110.1633, y: 7.525467}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1734767481
@@ -2425,7 +2426,7 @@ MonoBehaviour:
   m_firstVisibleCharacter: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 21.884155, y: 0, z: 20.544434, w: 0}
+  m_margin: {x: 21.884155, y: 0, z: 20.544434, w: -0.48035672}
   m_textInfo:
     textComponent: {fileID: 1942707366}
     characterCount: 0
@@ -2466,7 +2467,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -30.3}
+  m_AnchoredPosition: {x: 0, y: -9.1}
   m_SizeDelta: {x: 110.1633, y: 7.525467}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &2073093900
