@@ -4,11 +4,13 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 using UnityEngine.XR.MagicLeap;
+using TMPro;
 
 public class EyeTracking : MonoBehaviour
 {
     public Camera cam;
     public MLRangeSlider slider;
+    public TextMeshProUGUI recordingtext;
     public bool shouldRecord;
     public bool recordEmpty = true;
     bool recording;
@@ -226,6 +228,7 @@ public class EyeTracking : MonoBehaviour
         ui.pointsData = points;
 
         slider.gameObject.SetActive(true);
+        recordingtext.gameObject.SetActive(false);
         //SpawnParticles(points);
     }
 
