@@ -4,12 +4,15 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 using UnityEngine.XR.MagicLeap;
+using TMPro;
 
 public class EyeTracking : MonoBehaviour
 {
     public Camera cam;
-    public UnityEngine.UI.Slider slider;
+    public MLRangeSlider slider;
+    public TextMeshProUGUI recordingtext;
     public bool shouldRecord;
+    public bool recordEmpty = true;
     bool recording;
     bool startedRecording;
     bool savingDone;
@@ -21,21 +24,38 @@ public class EyeTracking : MonoBehaviour
     public GameObject pointIndicator;
     ParticleSystem particleSystem;
     //calculate color based on tracked points in this radius
-    public float neighborRadius = .5f;
-    public float neighborPointWeight = 0.05f;
+    public float neighborRadius;
+    public float neighborPointWeight;
+
+    public Color least;
+    public Color middleLower;
+    public Color middle;
+    public Color middleUpper;
+    public Color most;
+
+    private GameObject MLSpatialMapper;
 
     List<GameObject> spawnedPoints;
+    MeshManager meshManager;
+    Dictionary<MeshColoring, Dictionary<int, List<GameObject>>> triangleToTrackedPointsMappingPerMesh;
 
     Shader shader;
     MLInput.Controller controller;
 
+    UI ui;
+
+
     // Start is called before the first frame update
     void Start()
     {
+        ui = GameObject.Find("Canvas").GetComponent<UI>();
         shader = Shader.Find("Standard");
         spawnedPoints = new List<GameObject>();
         particleSystem = GetComponent<ParticleSystem>();
         dataPoints = new DataPoints();
+        meshManager = GameObject.Find("Reconstruction").GetComponent<MeshManager>();
+        triangleToTrackedPointsMappingPerMesh = new Dictionary<MeshColoring, Dictionary<int, List<GameObject>>>();
+
 
         MLInput.Start();
         MLInput.OnControllerButtonDown += OnButtonDown;
@@ -55,9 +75,14 @@ public class EyeTracking : MonoBehaviour
                 Debug.Log("Recording Started");
                 shouldRecord = true;
                 startedRecording = true;
+                ui.SetRecordingText(startedRecording);
             }
             else
             {
+                //Stop spatial Mapper, otherwise mesh will constantly be reconstructed and our Meshcoloring will be lost
+                MLSpatialMapper = GameObject.Find("MLSpatialMapper");
+                MLSpatialMapper.gameObject.SetActive(false);
+
                 StopCoroutine("WriteData");
                 MLEyes.Stop();
                 SaveAsJson();
@@ -65,6 +90,7 @@ public class EyeTracking : MonoBehaviour
                 List<TrackedPoint> points = LoadFromJson();
                 ShowPoints(points);
                 startedRecording = false;
+                ui.SetRecordingText(startedRecording);
             }
         }
     }
@@ -82,6 +108,10 @@ public class EyeTracking : MonoBehaviour
         //for debugging, delete later
         if (Input.GetKeyDown(KeyCode.A))
         {
+            //Stop spatial Mapper, otherwise mesh will constantly be reconstructed and our Meshcoloring will be lost
+            MLSpatialMapper = GameObject.Find("MLSpatialMapper");
+            MLSpatialMapper.gameObject.SetActive(false);
+
             ShowPoints(LoadFromJson());
         }
 
@@ -140,30 +170,65 @@ public class EyeTracking : MonoBehaviour
 
     void ShowPoints(List<TrackedPoint> points)
     {
-        UI ui = GameObject.Find("Canvas").GetComponent<UI>();
-        //TODO: replace with particle system or computeshader
+        
         foreach (TrackedPoint point in points) 
         {
-            MeshCorrected(point);
+            Vector3 normal = Vector3.zero;
             GameObject obj = Instantiate(pointIndicator, point.pos, Quaternion.identity);
+
+            if(meshManager.useUniformMesh) meshManager.UnifyMeshes();
+            else { 
+                foreach(MeshCollider collider in meshManager.GetComponentsInChildren<MeshCollider>())
+                {
+                    collider.sharedMesh = collider.GetComponent<MeshFilter>().mesh;
+                }
+            }
+
+            MeshCorrected(point, ref normal, obj);
+
+            foreach(MeshColoring mcol in triangleToTrackedPointsMappingPerMesh.Keys)
+            {
+                int[] triangles = mcol.GetComponent<MeshFilter>().sharedMesh.triangles;
+                int index = 0;
+                while (index < triangles.Length / 3)
+                {
+                    if (triangleToTrackedPointsMappingPerMesh.ContainsKey(mcol))
+                    {
+                        if (!triangleToTrackedPointsMappingPerMesh[mcol].ContainsKey(index)){
+                            triangleToTrackedPointsMappingPerMesh[mcol].Add(index, new List<GameObject>());
+                        }
+                    }
+                    index++;
+                }
+            }
+
             //obj.GetComponent<TrackedPoint>().time = point.time;
+            obj.transform.rotation = Quaternion.FromToRotation(obj.transform.forward, normal);
+            obj.transform.Translate(obj.transform.forward.normalized * 1 / 10);
 
             Color color = ComputeColor(ComputeWeight(points, point));
-            MeshRenderer renderer = obj.GetComponent<MeshRenderer>();
+            SpriteRenderer renderer = obj.GetComponent<SpriteRenderer>();
+            
+            float alpha = renderer.color.a;
+            renderer.color = new Color(color.r, color.g, color.b, renderer.color.a);
+            //Material newMat = renderer.material;
+            //float alpha = newMat.color.a;
+            //newMat.color = new Color(color.r, color.g, color.b, alpha);
 
-            Material newMat = renderer.material;
-            float alpha = newMat.color.a;
-            newMat.color = new Color(color.r, color.g, color.b, alpha);
-
-            renderer.material = newMat;
-
+            //renderer.material = newMat;
+            //Debug.Log(obj);
             ui.points.Add(obj);
         }
 
+        meshManager.Setup(triangleToTrackedPointsMappingPerMesh);
+        meshManager.InitMeshes();
+
         ui.maxTime = points[points.Count - 1].time;
+        ui.minTime = points[0].time;
         ui.pointsData = points;
 
         slider.gameObject.SetActive(true);
+        recordingtext.gameObject.SetActive(false);
         //SpawnParticles(points);
     }
 
@@ -187,14 +252,31 @@ public class EyeTracking : MonoBehaviour
 
     Color ComputeColor(float weight)
     {
-        Color start = Color.blue;
-        Color end = Color.green;
-        if (weight > .5f)
+        /*
+        Color start = least;
+        Color end = middleLower;
+
+        if (weight > .75f)
         {
-            start = Color.green;
-            end = Color.red;
+            start = middleUpper;
+            end = most;
+        }else if(weight > .5f)
+        {
+            start = middle;
+            end = middleUpper;
+        }else if(weight > .25f)
+        {
+            start = middleLower;
+            end = middle;
         }
-         return Color.Lerp(start, end, weight);
+
+        return Color.Lerp(start, end, weight);
+        */
+        if (weight > .8f) return most;
+        else if (weight > .6f) return middleUpper;
+        else if (weight > .4f) return middle;
+        else if (weight > .2f) return middleLower;
+        return least;
     }
 
     float ComputeWeight(List<TrackedPoint> points, TrackedPoint toBeColored)
@@ -204,13 +286,13 @@ public class EyeTracking : MonoBehaviour
         {
             float dist = (compare.pos - toBeColored.pos).magnitude;
             if (compare != toBeColored && dist <= neighborRadius){
-                weight += (1 - (neighborRadius - dist) / neighborRadius) * neighborPointWeight;
+                weight += ((neighborRadius - dist) / neighborRadius) * neighborPointWeight;
             }
         }
         return weight;
     }
 
-    void MeshCorrected(TrackedPoint point)
+    void MeshCorrected(TrackedPoint point, ref Vector3 normal, GameObject spawnedPoint)
     {
         //get view direction
         Vector3 dir = point.pos - point.camPos;
@@ -218,9 +300,39 @@ public class EyeTracking : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(cam.transform.position, dir, out hit, Mathf.Infinity))
         {
-            point.pos = hit.point;
-            //Debug.DrawRay(point.camPos, dir, Color.green);
-            //Debug.Log("Matched!");
+            string objName = hit.transform.gameObject.name;
+            int triangle = hit.triangleIndex;
+            MeshColoring mcoloring = hit.transform.GetComponent<MeshColoring>();
+            if (mcoloring != null)
+            {
+                if (triangleToTrackedPointsMappingPerMesh.ContainsKey(hit.transform.GetComponent<MeshColoring>()))
+                {
+                    if (triangleToTrackedPointsMappingPerMesh[mcoloring].ContainsKey(triangle))
+                    {
+                        //add point to hit triangle of mesh
+                        triangleToTrackedPointsMappingPerMesh[mcoloring][triangle].Add(spawnedPoint);
+                    }
+                    else
+                    {
+                        //add triangle to mesh and add point
+                        List<GameObject> trackedPoints = new List<GameObject>();
+                        trackedPoints.Add(spawnedPoint);
+                        triangleToTrackedPointsMappingPerMesh[mcoloring].Add(triangle, trackedPoints);
+                    }
+                }
+                else
+                {
+                    //add new mesh to dict and first triangle entry
+                    List<GameObject> trackedPoints = new List<GameObject>();
+                    trackedPoints.Add(spawnedPoint);
+                    Dictionary<int, List<GameObject>> newTriangleDict = new Dictionary<int, List<GameObject>>();
+                    newTriangleDict.Add(triangle, trackedPoints);
+                    triangleToTrackedPointsMappingPerMesh.Add(mcoloring, newTriangleDict);
+                }
+
+                spawnedPoint.transform.position = hit.point;
+                normal = hit.normal;
+            }
         }
         else
         {
