@@ -1,8 +1,8 @@
-# Magic Leap Unity Project Template
+# Medical Augmented Reality - Gaze Tracking 
 
-## Project
+## Team
 
-Medical Augmented Reality - Gaze Tracking 
+Markus Hamberger & Konstantin Karas
 
 ### Unity
 
